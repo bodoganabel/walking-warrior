@@ -26,8 +26,42 @@ class BaseLevel extends BaseState {
         this.tileState = null;
         this.counter = new ScoreCounter();
 
-        //blocking user from multiple click
-        this.blockUserInput = false;
+        /*
+            Abel's bugfix
+        
+            the game needs to have states.
+            - waitInput: the only state, where user can interact with tiles.error
+            - swap: the game swaps what player clicked to.error
+            - remove: in case of match/deletion the game removes the matching/deleted tiles
+            - fall: existing tiles will fall into place
+            - regenerate: create new tiles, which fall
+            */
+
+
+        //force reset state to waitInput
+        game.gameState = 'waitInput'; //It can be: waitInput
+
+        //force unblock user input
+        if (!game.addedDebugKeys) {
+
+            game.addedDebugKeys = true;
+
+            document.addEventListener('keyup', (event) => {
+                const keyName = event.key;
+                if (keyName == 'f') {
+                    game.gameState = 'waitInput';
+                    console.log("Game forced into waitInput state.")
+                }
+
+                if (keyName == 'd') {
+
+                    console.log("Game state: " + game.gameState);
+                }
+
+            }, false);
+
+        }
+
     }
 
 
@@ -117,6 +151,7 @@ class BaseLevel extends BaseState {
 
     update() {
 
+
         //lépések és pontok ellenőerzése
         if (this.isCompleted()) {
             if (this.getLevel() == 'SandBox') {
@@ -144,44 +179,53 @@ class BaseLevel extends BaseState {
 
 
         //a felhasználó ilyenkor éppen lenyomta az egyik tile-t, és ráhuzza egy másikra
-        if (this.activeTile1 && !this.activeTile2) {
-            let mousePos = {
-                x: this.game.input.x - this.tileOffset, //el van tolva a tile grid jobbra tileOffsetnyit
-                y: this.game.input.y
-            };
+        if (game.gameState == 'swap') {
+            if (this.activeTile1 && !this.activeTile2) {
+                let mousePos = {
+                    x: this.game.input.x - this.tileOffset, //el van tolva a tile grid jobbra tileOffsetnyit
+                    y: this.game.input.y
+                };
 
-            let hoverPos = {
-                x: Math.floor(mousePos.x / this.tileWidth),
-                y: Math.floor(mousePos.y / this.tileHeight)
-            };
+                let hoverPos = {
+                    x: Math.floor(mousePos.x / this.tileWidth),
+                    y: Math.floor(mousePos.y / this.tileHeight)
+                };
 
-            let diff = {
-                x: hoverPos.x - this.clickedPos.x,
-                y: hoverPos.y - this.clickedPos.y
-            }
+                let diff = {
+                    x: hoverPos.x - this.clickedPos.x,
+                    y: hoverPos.y - this.clickedPos.y
+                }
 
-            //ellenőrzés, hogy a griden belül vagyunk-e még
-            // if (!(hoverPosY > me.tileGrid[0].length - 1 || hoverPosY < 0) && !(hoverPosX > me.tileGrid.length - 1 || hoverPosX < 0)) {
-            if (hoverPos.x > this.gridSize.x || hoverPos.x < 0 || hoverPos.y > this.gridSize.y || hoverPos.y < 0) {
-                this.tileUp();
-                return;
-            }
+                //ellenőrzés, hogy a griden belül vagyunk-e még
+                // if (!(hoverPosY > me.tileGrid[0].length - 1 || hoverPosY < 0) && !(hoverPosX > me.tileGrid.length - 1 || hoverPosX < 0)) {
+                if (hoverPos.x > this.gridSize.x || hoverPos.x < 0 || hoverPos.y > this.gridSize.y || hoverPos.y < 0) {
+                    this.tileUp();
+                    return;
+                }
 
-            //megnézzük, hogy a user elhuzta-e az ujjat legalább egy tile szélességre vagy magasságra
-            if ((Math.abs(diff.x) == 1 && diff.y == 0) || (Math.abs(diff.y) == 1 && diff.x == 0)) {
-                this.activeTile2 = this.tileGrid[hoverPos.x][hoverPos.y];
-                this.swapTiles();
+                //megnézzük, hogy a user elhuzta-e az ujjat legalább egy tile szélességre vagy magasságra
+                if ((Math.abs(diff.x) == 1 && diff.y == 0) || (Math.abs(diff.y) == 1 && diff.x == 0)) {
+                    this.activeTile2 = this.tileGrid[hoverPos.x][hoverPos.y];
+                    this.swapTiles();
 
-                //csere után megnézzük, hogy van-e match a grid-ben
-                this.game.time.events.add(650, () => {
-                    let gotMatches = this.checkMatch();
+                    //csere után megnézzük, hogy van-e match a grid-ben
+                    this.game.time.events.add(650, () => {
+                        let gotMatches = this.checkMatch();
+                        console.log("awww")
 
-                    if (gotMatches) {
-                        this.decrementMoves();
-                    }
-                });
+                        if (gotMatches) {
+                            this.decrementMoves();
+                        }
+                        else
+                        {
+                            game.gameState = 'waitInput';
+                            console.log("Simple switch: has no match. Game state: "+game.gameState);
+                        }
+                    });
+                }
             }
         }
+
     }
 
     swapTiles(unblockUserInput) {
@@ -233,10 +277,10 @@ class BaseLevel extends BaseState {
 
             this.activeTile1 = this.tileGrid[t1Index.x][t1Index.y];
             this.activeTile2 = this.tileGrid[t2Index.x][t2Index.y];
-            if (unblockUserInput) {
+            if (unblockUserInput && game.gameState == 'swap') {
                 tween.onComplete.add(() => {
-                    this.blockUserInput = false;
-                    console.log("complete, unblock");
+                    game.gameState = 'waitInput';
+                    console.log("Game state: "+game.gameState);
                 });
             }
 
@@ -244,6 +288,9 @@ class BaseLevel extends BaseState {
     }
 
     checkMatch() {
+
+        game.gameState = 'check';
+        console.log("Game state: "+game.gameState);
         let matchGroups = ShapeMatcher.getMatches(this.tileGrid, this.gridSize.w, this.gridSize.h);
 
         if (matchGroups.length == 0) {
@@ -254,9 +301,12 @@ class BaseLevel extends BaseState {
                 this.swapTiles(true);
             }
         } else {
+            game.gameState = 'remove';
+            console.log("Game state: "+ game.gameState);
             this.removeMatches(matchGroups);
         }
         this.tileUp();
+
 
         return matchGroups.length > 0;
     }
@@ -335,7 +385,12 @@ class BaseLevel extends BaseState {
         //miutan beraktuk az eltávolítottak helyere az uj tile-okat, megnézzük, hogy lett-e így új match
         let me = this;
         this.game.time.events.add(650, () => {
-            me.checkMatch();
+            //ABELfix if mach found again, repeat process, else give back control to player
+            if(!me.checkMatch())
+            {
+                game.gameState = 'waitInput';
+                console.log("Game state: "+ game.gameState);
+            }
         });
     }
 
@@ -356,22 +411,21 @@ class BaseLevel extends BaseState {
                     let tempTile = this.tileGrid[i][j - 1];
                     this.tileGrid[i][j] = tempTile;
                     this.tileGrid[i][j - 1] = null;
-                   
+
                     let tween;
                     tween = this.game.add.tween(tempTile)
                     tween.to({
                         y: this.tileHeight * j + (this.tileHeight / 2)
                     }, 100, Phaser.Easing.Linear.In, true)
                     j = this.tileGrid[i].length;
-                    tween.onComplete.add(() => {
-                        console.log("drop complete, unblock");
-                        this.blockUserInput=false;
-                    }
-                     )
+
+
                 }
             }
         }
     }
+
+
 
     getMatches(col, row) {
         let matches = ShapeMatcher.matchAll(this.tileGrid, col, row, this.gridSize.w, this.gridSize.h);
@@ -448,9 +502,10 @@ class BaseLevel extends BaseState {
         let tile = this.tiles.create(tx, ty, tileNumber.toString());
 
         if (type == 0) {
-            this.game.add.tween(tile).to({
+            let tween = this.game.add.tween(tile);
+            tween.to({
                 y: j * this.tileHeight + (this.tileHeight / 2)
-            }, 200, Phaser.Easing.Linear.In, true)
+            }, 100, Phaser.Easing.Linear.In, true)
         }
         // .onComplete.add(function() {
         // 	me.correctTilePosition();
@@ -480,16 +535,14 @@ class BaseLevel extends BaseState {
     tileDown(tile) {
 
         //Prevent user: free swap by double clicking  
-        if (this.blockUserInput) {
+        if (game.gameState != 'waitInput') {
             console.log("click blocked");
             return;
         }
-        //Blocking any further input from the user. Every action's end will unblock this.
-        this.blockUserInput = true;
-        console.log("user started action, block");
-        console.log(this.blockUserInput);
 
-        console.log("tile down")
+        game.gameState = 'swap';
+        console.log("Game State: " + game.gameState);
+
         if (tile.tileType == 'potassium') {
             this.deleteRow(tile);
             return;
