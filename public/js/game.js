@@ -1,0 +1,45 @@
+let game = new Phaser.Game(WW.gameConfig);
+
+game.state.add('Boot', Boot, false);
+game.state.add('Preload', Preload, false);
+game.state.add('Error', Error, false);
+game.state.add('Menu', Menu, false);
+game.state.add('NextLevel', NextLevel, false);
+game.state.add('Levels', Levels, false);
+game.state.add('Counter', Counter, false);
+game.state.add('Install', Install, false);
+game.state.add('Level1', Level1, false);
+game.state.add('Level2', Level2, false);
+game.state.add('Level3', Level3, false);
+game.state.add('Level4', Level4, false);
+game.state.add('Level5', Level5, false);
+game.state.add('Level6', Level6, false);
+game.state.add('Level7', Level7, false);
+game.state.add('Level8', Level8, false);
+game.state.add('Level9', Level9, false);
+game.state.add('Level10', Level10, false);
+game.state.add('Level11', Level11, false);
+game.state.add('Level12', Level12, false);
+game.state.add('Level13', Level13, false);
+game.state.add('Level14', Level14, false);
+game.state.add('Level15', Level15, false);
+game.state.add('Level16', Level16, false);
+game.state.add('Level17', Level17, false);
+game.state.add('Level18', Level18, false);
+game.state.add('Level19', Level19, false);
+game.state.add('Level20', Level20, false);
+game.state.add('Level21', Level21, false);
+game.state.add('Level22', Level22, false);
+game.state.add('Level23', Level23, false);
+game.state.add('SandBox', SandBox, false);
+
+game.state.add('Instruction1', Instruction1);
+game.state.add('Instruction2', Instruction2);
+game.state.add('Instruction3', Instruction3);
+game.state.add('Instruction4', Instruction4);
+game.state.add('Instruction5', Instruction5);
+game.state.add('Instruction6', Instruction6);
+game.state.add('Instruction7', Instruction7);
+game.state.add('Instruction8', Instruction8);
+
+game.state.start('Boot');
