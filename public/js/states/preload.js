@@ -75,6 +75,7 @@ class Preload extends BaseState {
         this.game.load.spritesheet('nextbutton', 'public/assets/next.png')
         this.game.load.spritesheet('downloadbutton', 'public/assets/download.png')
         this.game.load.spritesheet('backbutton', 'public/assets/backbutton.png')
+        console.log("running");
     }
 
     create() {

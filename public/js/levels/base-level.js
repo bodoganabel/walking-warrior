@@ -25,6 +25,9 @@ class BaseLevel extends BaseState {
 
         this.tileState = null;
         this.counter = new ScoreCounter();
+
+        //blocking user from multiple click
+        this.blockUserInput = false;
     }
 
 
@@ -111,7 +114,9 @@ class BaseLevel extends BaseState {
         return this.score >= this.scoreToFinish;
     }
 
+
     update() {
+
         //lépések és pontok ellenőerzése
         if (this.isCompleted()) {
             if (this.getLevel() == 'SandBox') {
@@ -179,7 +184,7 @@ class BaseLevel extends BaseState {
         }
     }
 
-    swapTiles() {
+    swapTiles(unblockUserInput) {
         if (this.activeTile1 && this.activeTile2) {
             //nomove tile check
             if (this.activeTile1.tileType == 14 || this.activeTile2.tileType == 14) {
@@ -214,17 +219,27 @@ class BaseLevel extends BaseState {
             }
 
             //Actually move them on the screen
-            this.game.add.tween(this.activeTile1).to({
+            let tween;
+            tween = this.game.add.tween(this.activeTile1);
+            tween.to({
                 x: tile2Pos.x * this.tileWidth + (this.tileWidth / 2),
                 y: tile2Pos.y * this.tileHeight + (this.tileHeight / 2)
             }, 200, Phaser.Easing.Linear.In, true);
-            this.game.add.tween(this.activeTile2).to({
+            tween = this.game.add.tween(this.activeTile2);
+            tween.to({
                 x: tile1Pos.x * this.tileWidth + (this.tileWidth / 2),
                 y: tile1Pos.y * this.tileHeight + (this.tileHeight / 2)
             }, 200, Phaser.Easing.Linear.In, true);
 
             this.activeTile1 = this.tileGrid[t1Index.x][t1Index.y];
             this.activeTile2 = this.tileGrid[t2Index.x][t2Index.y];
+            if (unblockUserInput) {
+                tween.onComplete.add(() => {
+                    this.blockUserInput = false;
+                    console.log("complete, unblock");
+                });
+            }
+
         }
     }
 
@@ -236,7 +251,7 @@ class BaseLevel extends BaseState {
             if (this.switchOn) {
                 this.switchTiles();
             } else {
-                this.swapTiles();
+                this.swapTiles(true);
             }
         } else {
             this.removeMatches(matchGroups);
@@ -341,11 +356,18 @@ class BaseLevel extends BaseState {
                     let tempTile = this.tileGrid[i][j - 1];
                     this.tileGrid[i][j] = tempTile;
                     this.tileGrid[i][j - 1] = null;
-
-                    this.game.add.tween(tempTile).to({
+                   
+                    let tween;
+                    tween = this.game.add.tween(tempTile)
+                    tween.to({
                         y: this.tileHeight * j + (this.tileHeight / 2)
                     }, 100, Phaser.Easing.Linear.In, true)
                     j = this.tileGrid[i].length;
+                    tween.onComplete.add(() => {
+                        console.log("drop complete, unblock");
+                        this.blockUserInput=false;
+                    }
+                     )
                 }
             }
         }
@@ -455,7 +477,19 @@ class BaseLevel extends BaseState {
         return tileTypePool[rnd];
     }
 
-    tileDown(tile, pointer) {
+    tileDown(tile) {
+
+        //Prevent user: free swap by double clicking  
+        if (this.blockUserInput) {
+            console.log("click blocked");
+            return;
+        }
+        //Blocking any further input from the user. Every action's end will unblock this.
+        this.blockUserInput = true;
+        console.log("user started action, block");
+        console.log(this.blockUserInput);
+
+        console.log("tile down")
         if (tile.tileType == 'potassium') {
             this.deleteRow(tile);
             return;
@@ -474,6 +508,8 @@ class BaseLevel extends BaseState {
         }
 
         this.activeTile1 = tile;
+
+
 
         this.clickedPos.x = (tile.x - this.tileOffset - this.tileWidth / 2) / this.tileWidth;
         this.clickedPos.y = (tile.y - this.tileHeight / 2) / this.tileHeight;

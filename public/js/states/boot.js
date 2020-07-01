@@ -10,4 +10,5 @@ class Boot extends BaseState {
 
         this.game.state.start('Preload');
     }
+
 }
