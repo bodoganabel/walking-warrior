@@ -313,7 +313,7 @@ class BaseLevel extends BaseState {
         }
     }
 
-    checkMatch() {
+    checkMatch (){
         game.gameState = 'check';
         console.log("Game state: " + game.gameState);
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
@@ -326,10 +326,10 @@ class BaseLevel extends BaseState {
             this.decrementMoves();
             this.removeMatches(matchGroups);
 
-            this.game.time.events.add(300, () => {
+            let events = this.game.time.events
+            events.add(300, () => {
 
                 this.dropTiles();
-
 
                 game.gameState = 'regenerate';
                 console.log("Game state: " + game.gameState);
@@ -349,13 +349,15 @@ class BaseLevel extends BaseState {
 
 
     regenerateTiles() {
-        this.game.time.events.add(300, () => {
+        let events = this.game.time.events
+        events.add(300, () => {
             this.fillTiles();
             this.updateObjective();
             //check again if there is match. If no more, finish up the swipe.
-            if (!this.checkMatch()) {
+            if(!this.checkMatch())
+            {
+                console.log("All regeneration finished.");
                 this.tileUp();
-                console.log("All new matches are handled.");
             }
         })
     }
@@ -417,13 +419,6 @@ class BaseLevel extends BaseState {
                     } else {
                         // newTile = this.addTile(pos.x, pos.y, 0);
                     }
-
-
-                    console.log("REMOVE THIS")
-                    console.log(game.tileGrid[pos.x][pos.y].tileType);
-                    game.tileGrid[pos.x][pos.y] = newTile;
-                    console.log(game.tileGrid[pos.x][pos.y].tileType);
-                    console.log("REMOVE THIS")
                 }
 
                 //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
@@ -546,9 +541,6 @@ class BaseLevel extends BaseState {
                 y: j * this.tileHeight + (this.tileHeight / 2)
             }, 100, Phaser.Easing.Linear.In, true)
         }
-        // .onComplete.add(function() {
-        // 	me.correctTilePosition();
-        // })
         tile.anchor.setTo(0.5, 0.5);
         tile.inputEnabled = true;
         tile.tileType = tileNumber;

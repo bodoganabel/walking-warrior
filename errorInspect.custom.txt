@@ -1,0 +1,105 @@
+_bounds: Object { x: 0, y: 0, width: 0, … }
+​
+_cacheAsBitmap: false
+​
+_cacheIsDirty: false
+​
+_cr: 1
+​
+_currentBounds: null
+​
+_exists: true
+​
+_frame: Object { index: 0, x: 0, y: 0, … }
+​
+_height: 0
+​
+_mask: null
+​
+_sr: 0
+​
+_width: 0
+​
+alive: true
+​
+alpha: 1
+​
+anchor: Object { x: 0.5, y: 0.5, type: 25 }
+​
+animations: Object { sprite: {…}, updateIfVisible: true, isLoaded: true, … }
+​
+blendMode: 0
+​
+body: null
+​
+cachedTint: -1
+​
+cameraOffset: Object { x: 1100, y: 0, type: 25 }
+​
+children: Array []
+​
+customRender: false
+​
+data: Object {  }
+​
+events: Object { parent: {…}, _onAddedToGroup: {…}, _onRemovedFromGroup: {…}, … }
+​
+filterArea: null
+​
+game: Object { id: 0, width: 1400, height: 1920, … }
+​
+hitArea: null
+​
+ignoreChildInput: false
+​
+inMatch: true
+​
+input: Object { enabled: false, checked: false, priorityID: 0, … }
+​
+key: "1"
+​
+parent: undefined
+​
+physicsType: 0
+​
+pivot: Object { x: 0, y: 0, type: 25 }
+​
+position: Object { x: 900, y: 700, type: 25 }
+​
+previousPosition: Object { x: 1100, y: 0, type: 25 }
+​
+renderable: true
+​
+rotation: 0
+​
+scale: Object { x: 1, y: 1, type: 25 }
+​
+shader: null
+​
+texture: Object { noFrame: false, valid: true, isTiling: false, … }
+​
+tileType: 1
+​
+tint: 16777215
+​
+tintedTexture: null
+​
+type: 0
+​
+visible: true
+​
+world: Object { x: 1100, y: 0, type: 25 }
+​
+worldAlpha: 1
+​
+worldPosition: Object { x: 0, y: 0, type: 25 }
+​
+worldRotation: 0
+​
+worldScale: Object { x: 1, y: 1, type: 25 }
+​
+worldTransform: Object { a: 1, b: 0, c: 0, … }
+​
+z: 52
+​
+<prototype>: Object { constructor: Sprite(a, b, d, e, f), game: null, z: 0, … }
