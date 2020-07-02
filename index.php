@@ -17,7 +17,8 @@
     </head>
     <body>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.6.2/phaser.min.js"></script>
+        <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.6.2/phaser.min.js"></script -->
+        <script src="./phaser.min.js"></script>
         <?php Manager::includeScripts(); ?>
     </body>
 </html>
