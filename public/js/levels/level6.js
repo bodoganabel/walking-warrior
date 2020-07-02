@@ -51,7 +51,7 @@ class Level6 extends TokenLevel {
     //                 } else {
     //                     newTile = this.addTile(pos.x, pos.y, 0);
     //                 }
-    //                 this.tileGrid[pos.x][pos.y] = newTile;
+    //                 game.tileGrid[pos.x][pos.y] = newTile;
     //             }
 
     //             if (hasBonusTile) {

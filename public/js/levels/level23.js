@@ -17,8 +17,8 @@ class Level23 extends TokenLevel {
 
     hasNeighbouringBonusTile(tile) {
         let pos = this.getTilePos(tile);
-        let rightNeighbour = this.tileGrid[pos.x + 1][pos.y];
-        let bottomNeighbour = this.tileGrid[pos.x][pos.y + 1];
+        let rightNeighbour = game.tileGrid[pos.x + 1][pos.y];
+        let bottomNeighbour = game.tileGrid[pos.x][pos.y + 1];
 
         let c1 = this.isBonusTile(tile);
         let c2 = rightNeighbour && this.isBonusTile(rightNeighbour);
@@ -31,7 +31,7 @@ class Level23 extends TokenLevel {
     checkMatch() {
         for (let i = 0; i < this.gridSize.w - 1; ++i) {
             for (let j = 0; j < this.gridSize.h - 1; ++j) {
-                if (this.hasNeighbouringBonusTile(this.tileGrid[i][j])) {
+                if (this.hasNeighbouringBonusTile(game.tileGrid[i][j])) {
                     this.counter.increment('neighbouring-bonus-count');
                     return;
                 }
