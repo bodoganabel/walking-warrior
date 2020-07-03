@@ -353,18 +353,17 @@ class BaseLevel extends BaseState {
     regenerateTiles(whoCallsMe) {
 
         game.EventsWaitingCounter--;
-        if(game.EventsWaitingCounter > 0)
-        {
+        if (game.EventsWaitingCounter > 0) {
             return false;
         }
-        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: "+ game.EventsWaitingCounter + "and called by: "+ whoCallsMe)
+        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
         console.log("so far so good")
         this.showDebugTile();
-        /*
+
         let events = this.game.time.events
         events.add(300, () => {
             this.fillTiles();
-        })*/
+        })
         return true;
     }
 
@@ -442,40 +441,12 @@ class BaseLevel extends BaseState {
 
     fillTiles() {
         console.log("pos: fill tiles")
-        let lastRegeneratedTile = {};
-        let dbg_count = 0;
-
-        console.log(game.tileGrid)
-        this.showDebugTile();
-        for (let i = 0; i < this.gridSize.w; ++i) {
-            for (let j = 0; j < this.gridSize.h; ++j) {
-                console.log(" ")
-                console.log(game.tileGrid[i][j].tileType)
-                console.log(game.tileGrid[i][j].tileType.toString())
-                if (game.tileGrid[i][j].tileType.toString() == '-1') {
-                    console.log("true");
-                    console.log(game.tileGrid[i][j].tileType.toString())
-                    console.log("i: "+i+", j: "+j)
-                    lastRegeneratedTile = { i: i, j: j };
-                    dbg_count++;
-                }
-            }
-        }
-        console.log("number of regenerating tiles: ")
-        console.log(dbg_count)
 
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = 0; j < this.gridSize.h; ++j) {
                 if (game.tileGrid[i][j].tileType == '-1') {
 
-                    //is this the last tile to regenerate
-                    if (lastRegeneratedTile.i == i && lastRegeneratedTile.j == j) {
-                        this.addTile(i, j, 0, true);
-                        console.log("i should see this ony once")
-                    }
-                    else {
-                        this.addTile(i, j);
-                    }
+                    this.addTile(i, j);
                 }
             }
         }
@@ -484,41 +455,51 @@ class BaseLevel extends BaseState {
 
     dropTiles() {
 
-        for (let i = this.gridSize.w-1; i >= 0; i--) {
+        for (let i = this.gridSize.w - 1; i >= 0; i--) {
             for (let j = this.gridSize.h - 1; j >= 0; --j) {
-                
+
                 //Actual tile is zero
-                if (game.tileGrid[i][j].tileType == '-1')
-                {
+                if (game.tileGrid[i][j].tileType == '-1') {
                     console.log("found zero")
-                    for(let k=j-1; k>=0; k--)
+                    //ha a legtetején vagyunk az oszlopnak
+                    if(j==0)
                     {
-                        if(game.tileGrid[i][k].tileType != '-1')
-                        {
-                            let tempTile = game.tileGrid[i][k];
-                            game.tileGrid[i][k] = game.tileGrid[i][j];
-                            game.tileGrid[i][j] = tempTile;
 
-                            let tween;
-                            tween = this.game.add.tween(tempTile)
-                            tween.to({
-                                y: this.tileHeight * j + (this.tileHeight / 2)
-                            }, 500, Phaser.Easing.Linear.In, true)
-                            
-                            game.EventsWaitingCounter++;
-                            tween.onComplete.add(
-                                () => {
-                                    console.log("try call regenerateTiles")
-                                    this.regenerateTiles("dropTiles")
-                                } 
-                            )
-
-                            break
+                        game.EventsWaitingCounter++;
+                        this.game.time.events.add(200, () => {
+                            this.regenerateTiles("dropTiles")
+                        })
+                    }
+                    else
+                    {
+                        for (let k = j - 1; k >= 0; k--) {
+                            if (game.tileGrid[i][k].tileType != '-1') {
+                                let tempTile = game.tileGrid[i][k];
+                                game.tileGrid[i][k] = game.tileGrid[i][j];
+                                game.tileGrid[i][j] = tempTile;
+    
+                                let tween;
+                                tween = this.game.add.tween(tempTile)
+                                tween.to({
+                                    y: this.tileHeight * j + (this.tileHeight / 2)
+                                }, 200, Phaser.Easing.Linear.In, true)
+    
+                                game.EventsWaitingCounter++;
+                                tween.onComplete.add(
+                                    () => {
+                                        console.log("try call regenerateTiles")
+                                        this.regenerateTiles("dropTiles")
+                                    }
+                                )
+    
+                                break
+                            }
                         }
                     }
+                    
                 }
 
-                    //j = game.tileGrid[i].length;
+                //j = game.tileGrid[i].length;
             }
         }
     }
@@ -558,14 +539,13 @@ class BaseLevel extends BaseState {
 
         let me = this;
         this.game.time.events.add(650, () => {
-            if(!me.checkMatch())
-            {
+            if (!me.checkMatch()) {
                 this.tileUp();
             }
         })
     }
 
-    addTile(i, j, type = 0, isLastRegeneratedTile = false) {
+    addTile(i, j, type = 0) {
         // ha már van ezen a pozíción tile, akkor ne írja felül
         // így meg lehet matchek-nél akadályozni, hogy két match kereszteződésénél 2 új tile legyen berakva
         if (game.tileGrid[i][j].tileType != '-1') {
@@ -590,23 +570,18 @@ class BaseLevel extends BaseState {
             let tween = this.game.add.tween(tile);
             tween.to({
                 y: j * this.tileHeight + (this.tileHeight / 2)
-            }, 1000, Phaser.Easing.Linear.In, true)
+            }, 100, Phaser.Easing.Linear.In, true)
 
             /*
             BUGFIX:
             When we deleted matching tiles, we need to create new ones. Codes below runs only when the last regenerated tile is landed to its place
             */
-            if (isLastRegeneratedTile)
-                tween.onComplete.add(
-                    () => {
-                        this.updateObjective();
-                        //check again if there is match. If no more, finish up the swipe.
-                        if (!this.checkMatch()) {
-                            console.log("All regeneration finished.");
-                            this.tileUp();
-                        }
-                    }
-                )
+            game.EventsWaitingCounter++;
+            tween.onComplete.add(
+                () => {
+                    this.checkNewMatchesAfterRegeneration('addTile');
+                }
+            )
         }
         tile.anchor.setTo(0.5, 0.5);
         tile.inputEnabled = true;
@@ -619,6 +594,26 @@ class BaseLevel extends BaseState {
 
         return tile;
     }
+
+    checkNewMatchesAfterRegeneration(whoCallsMe) {
+
+        game.EventsWaitingCounter--;
+        if (game.EventsWaitingCounter > 0) {
+            return false;
+        }
+        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
+        console.log("seems okay")
+
+        this.updateObjective();
+        //check again if there is match. If no more, finish up the swipe.
+        if (!this.checkMatch()) {
+            console.log("All regeneration finished.");
+            this.tileUp();
+        }
+    }
+
+
+
 
     randomizeTile() {
         let tileTypePool = this.tileTypes;
@@ -637,6 +632,7 @@ class BaseLevel extends BaseState {
         //Prevent user: free swap by double clicking  
         if (game.gameState != 'waitInput') {
             console.log("click blocked");
+            this.showDebugTile();
             return;
         }
 
