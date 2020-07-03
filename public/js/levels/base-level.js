@@ -334,9 +334,10 @@ class BaseLevel extends BaseState {
             console.log("Game state: " + game.gameState);
             this.decrementMoves();
             this.removeMatches(matchGroups);
+            /*
             console.log("pos: checkmatch after remove")
             this.dropTiles();
-
+            */
             return true;
         }
         else {
@@ -419,7 +420,9 @@ class BaseLevel extends BaseState {
                 }
             }
         }
-        console.log("pos: over removefor")
+
+        console.log("pos: remove tiles done. Grid:")
+        this.showDebugTile();
     }
 
 
@@ -490,15 +493,15 @@ class BaseLevel extends BaseState {
                 if (game.tileGrid[i][j].tileType == '-1' && game.tileGrid[i][j - 1].tileType != '-1') {
 
 
-                    let tempTile = game.tileGrid[i][j - 1].tileType;
-                    game.tileGrid[i][j].tileType = tempTile;
+                    let tempTile = game.tileGrid[i][j - 1];
+                    game.tileGrid[i][j].tileType = tempTile.tileType;
                     game.tileGrid[i][j - 1].tileType = '-1';
 
                     let tween;
                     tween = this.game.add.tween(tempTile)
                     tween.to({
                         y: this.tileHeight * j + (this.tileHeight / 2)
-                    }, 100, Phaser.Easing.Linear.In, true)
+                    }, 500, Phaser.Easing.Linear.In, true)
 
                     //if this is the last dropping tile, add code to run after last drop.
                     console.log({ i: i, j: j })
@@ -561,7 +564,10 @@ class BaseLevel extends BaseState {
 
         let me = this;
         this.game.time.events.add(650, () => {
-            me.checkMatch();
+            if(!me.checkMatch())
+            {
+                this.tileUp();
+            }
         })
     }
 
