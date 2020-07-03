@@ -500,7 +500,7 @@ class BaseLevel extends BaseState {
                             game.tileGrid[i][j] = tempTile;
 
                             let tween;
-                            tween = this.game.add.tween(game.tileGrid[i][k])
+                            tween = this.game.add.tween(tempTile)
                             tween.to({
                                 y: this.tileHeight * j + (this.tileHeight / 2)
                             }, 500, Phaser.Easing.Linear.In, true)
