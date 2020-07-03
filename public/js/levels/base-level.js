@@ -4,9 +4,23 @@ class BaseLevel extends BaseState {
         this.score = 0;
         this.tileOffset = 200;
         this.tileHeight = this.tileWidth = 200;
-        game.tileGrid = [];
-        this.tiles = [];
+        
+        
+        //regex: game.tileGrid.*=
         this.gridSize = { w: 6, h: 9 };
+        game.tileGrid = new Array(this.gridSize.w);
+        for(let i=0; i< this.gridSize.w; i++)
+        {
+            game.tileGrid[i] = new Array(this.gridSize.h);
+            for(let j=0; j< this.gridSize.h; j++)
+            {
+                game.tileGrid[i][j] = {tileType: '-1'};
+            }
+        }
+
+        console.log(game.tileGrid[1]);
+        this.tiles = [];
+
         this.tileTypes = LVL.tileTypes;
 
         this.deleteOn = false;
@@ -284,9 +298,6 @@ class BaseLevel extends BaseState {
                 game.tileGrid[t1Index.x][t1Index.y] = this.activeTile2;
                 game.tileGrid[t2Index.x][t2Index.y] = this.activeTile1;
 
-                console.log("ilyenkor miért létezik az alábbi tileGrid??");
-                console.log(game.tileGrid);
-
             } catch (e) {
                 console.warn('Error swapping the tiles...');
             }
@@ -325,19 +336,8 @@ class BaseLevel extends BaseState {
             console.log("Game state: " + game.gameState);
             this.decrementMoves();
             this.removeMatches(matchGroups);
-
-            let events = this.game.time.events
-            events.add(300, () => {
-
-                this.dropTiles();
-
-                game.gameState = 'regenerate';
-                console.log("Game state: " + game.gameState);
-                //TODO: call regenerating function!!!
-                this.regenerateTiles();
-
-
-            });
+            console.log("pos: checkmatch after remove")
+            this.dropTiles();
 
             return true;
         }
@@ -350,6 +350,7 @@ class BaseLevel extends BaseState {
 
     regenerateTiles() {
         let events = this.game.time.events
+        console.log("pos: previously added regenerate function now executes")
         events.add(300, () => {
             this.fillTiles();
             this.updateObjective();
@@ -413,11 +414,10 @@ class BaseLevel extends BaseState {
 
                     let pos = this.getTilePos(match[i]);
                     this.removeTile(match[i]);
-                    let newTile = null;
                     if (i == 3) {
-                        newTile = this.addTile(pos.x, pos.y, bonusType);
+                        this.addTile(pos.x, pos.y, bonusType);
                     } else {
-                        // newTile = this.addTile(pos.x, pos.y, 0);
+
                     }
                 }
 
@@ -428,32 +428,80 @@ class BaseLevel extends BaseState {
                 }
             }
         }
+        console.log("pos: over removefor")
     }
 
+
+
     fillTiles() {
+        console.log("pos: fill tiles")
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = 0; j < this.gridSize.h; ++j) {
-                if (game.tileGrid[i][j] == null) {
-                    game.tileGrid[i][j] = this.addTile(i, j);
+                if (game.tileGrid[i][j].tileType == '-1') {
+                    this.addTile(i, j);
                 }
             }
         }
+        console.log("pos: after filled tiles")
+
     }
 
     dropTiles() {
+
+        let lastDropper = undefined;
+
+        //find out who is the last tile to give only him callback.
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = this.gridSize.h - 1; j > 0; --j) {
-                if (game.tileGrid[i][j] == null && game.tileGrid[i][j - 1] != null) {
+                if (game.tileGrid[i][j].tileType == '-1' && game.tileGrid[i][j - 1].tileType != '-1') {
+                    lastDropper = {i:i,j:j}
+                }
+            }
+        }
+
+        console.log("got last dropper:")
+        console.log(lastDropper)
+
+
+
+
+        for (let i = 0; i < this.gridSize.w; ++i) {
+            for (let j = this.gridSize.h - 1; j > 0; --j) {
+                if (game.tileGrid[i][j].tileType == '-1' && game.tileGrid[i][j - 1].tileType  != '-1') {
+                    
+
                     let tempTile = game.tileGrid[i][j - 1];
                     game.tileGrid[i][j] = tempTile;
-                    game.tileGrid[i][j - 1] = null;
+                    game.tileGrid[i][j - 1].tileType = '-1';
 
                     let tween;
                     tween = this.game.add.tween(tempTile)
                     tween.to({
                         y: this.tileHeight * j + (this.tileHeight / 2)
                     }, 100, Phaser.Easing.Linear.In, true)
+                    
+                    //ha ez az utolsó droppoló tile, adjuk hozzá a továbbfutáshoz szükséges kódot
+                    console.log({i:i, j:j})
+                    
+                    if(lastDropper.i == i && lastDropper.j == j)
+                    {
+                        console.log("last dropper found.")
+                        tween.onComplete.add(
+                        () => {
+
+                            game.gameState = 'regenerate';
+                            console.log("Game state: " + game.gameState);
+                            this.regenerateTiles();
+                    
+                            console.log("pos: delayed event added at checkmatch")
+                        }
+                        
+                    )
+                    }
+                    
+                    
                     j = game.tileGrid[i].length;
+
                 }
             }
         }
@@ -487,24 +535,20 @@ class BaseLevel extends BaseState {
 
         let pos = this.getTilePos(tile);
         this.tiles.remove(tile);
-        game.tileGrid[pos.x][pos.y] = null;
+        game.tileGrid[pos.x][pos.y].tileType = '-1';
     }
 
     setupTiles() {
         this.tiles = this.game.add.group();
-
         for (let i = 0; i < this.gridSize.w; ++i) {
-            game.tileGrid[i] = [];
-
             for (let j = 0; j < this.gridSize.h; ++j) {
-                let tile;
+                console.log(`i: ${i} i: ${j} ` )
                 //ha van tileStateünk mentésből, akkor abból töltjük fel a gridet
                 if (this.tileState == null) {
-                    tile = this.addTile(i, j);
+                    this.addTile(i, j);
                 } else {
-                    tile = this.addTile(i, j, this.tileState[i][j]);
+                    this.addTile(i, j, this.tileState[i][j]);
                 }
-                game.tileGrid[i][j] = tile;
             }
         }
 
@@ -517,7 +561,7 @@ class BaseLevel extends BaseState {
     addTile(i, j, type = 0) {
         // ha már van ezen a pozíción tile, akkor ne írja felül
         // így meg lehet matchek-nél akadályozni, hogy két match kereszteződésénél 2 új tile legyen berakva
-        if (game.tileGrid[i][j] != null) {
+        if (game.tileGrid[i][j].tileType != '-1') {
             return;
         }
 
@@ -546,6 +590,7 @@ class BaseLevel extends BaseState {
         tile.tileType = tileNumber;
         tile.events.onInputDown.add(this.tileDown, this);
         tile.inMatch = false;
+        game.tileGrid[i][j] = tile;
 
         return tile;
     }
@@ -714,10 +759,8 @@ class BaseLevel extends BaseState {
     }
 
     deleteTile(tile) {
-        let pos = this.getTilePos(tile);
         this.removeTile(tile);
-        let newTile = this.addTile(pos.x, pos.y, 0);
-        game.tileGrid[pos.x][pos.y] = newTile;
+        this.addTile(pos.x, pos.y, 0);
 
 
         this.game.time.events.add(650, () => {
