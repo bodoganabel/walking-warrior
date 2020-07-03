@@ -82,6 +82,11 @@ class BaseLevel extends BaseState {
 
         }
 
+
+        //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
+        // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
+        game.EventsWaitingCounter = 0;
+
     }
 
     showDebugTile() {
@@ -334,10 +339,8 @@ class BaseLevel extends BaseState {
             console.log("Game state: " + game.gameState);
             this.decrementMoves();
             this.removeMatches(matchGroups);
-            /*
-            console.log("pos: checkmatch after remove")
             this.dropTiles();
-            */
+
             return true;
         }
         else {
@@ -347,12 +350,22 @@ class BaseLevel extends BaseState {
     }
 
 
-    regenerateTiles() {
+    regenerateTiles(whoCallsMe) {
+
+        game.EventsWaitingCounter--;
+        if(game.EventsWaitingCounter > 0)
+        {
+            return false;
+        }
+        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: "+ game.EventsWaitingCounter + "and called by: "+ whoCallsMe)
+        console.log("so far so good")
+        this.showDebugTile();
+        /*
         let events = this.game.time.events
-        console.log("pos: previously added regenerate function now executes")
         events.add(300, () => {
             this.fillTiles();
-        })
+        })*/
+        return true;
     }
 
 
@@ -471,60 +484,41 @@ class BaseLevel extends BaseState {
 
     dropTiles() {
 
-        let lastDropper = undefined;
+        for (let i = this.gridSize.w-1; i >= 0; i--) {
+            for (let j = this.gridSize.h - 1; j >= 0; --j) {
+                
+                //Actual tile is zero
+                if (game.tileGrid[i][j].tileType == '-1')
+                {
+                    console.log("found zero")
+                    for(let k=j-1; k>=0; k--)
+                    {
+                        if(game.tileGrid[i][k].tileType != '-1')
+                        {
+                            let tempTile = game.tileGrid[i][k];
+                            game.tileGrid[i][k] = game.tileGrid[i][j];
+                            game.tileGrid[i][j] = tempTile;
 
-        //find out who is the last tile to give only him callback.
-        for (let i = 0; i < this.gridSize.w; ++i) {
-            for (let j = this.gridSize.h - 1; j > 0; --j) {
-                if (game.tileGrid[i][j].tileType == '-1' && game.tileGrid[i][j - 1].tileType != '-1') {
-                    lastDropper = { i: i, j: j }
-                }
-            }
-        }
+                            let tween;
+                            tween = this.game.add.tween(game.tileGrid[i][k])
+                            tween.to({
+                                y: this.tileHeight * j + (this.tileHeight / 2)
+                            }, 500, Phaser.Easing.Linear.In, true)
+                            
+                            game.EventsWaitingCounter++;
+                            tween.onComplete.add(
+                                () => {
+                                    console.log("try call regenerateTiles")
+                                    this.regenerateTiles("dropTiles")
+                                } 
+                            )
 
-        console.log("got last dropper:")
-        console.log(lastDropper)
-
-
-
-
-        for (let i = 0; i < this.gridSize.w; ++i) {
-            for (let j = this.gridSize.h - 1; j > 0; --j) {
-                if (game.tileGrid[i][j].tileType == '-1' && game.tileGrid[i][j - 1].tileType != '-1') {
-
-
-                    let tempTile = game.tileGrid[i][j - 1];
-                    game.tileGrid[i][j].tileType = tempTile.tileType;
-                    game.tileGrid[i][j - 1].tileType = '-1';
-
-                    let tween;
-                    tween = this.game.add.tween(tempTile)
-                    tween.to({
-                        y: this.tileHeight * j + (this.tileHeight / 2)
-                    }, 500, Phaser.Easing.Linear.In, true)
-
-                    //if this is the last dropping tile, add code to run after last drop.
-                    console.log({ i: i, j: j })
-
-                    if (lastDropper.i == i && lastDropper.j == j) {
-                        console.log("last dropper found.")
-                        tween.onComplete.add(
-                            () => {
-
-                                game.gameState = 'regenerate';
-                                console.log("Game state: " + game.gameState);
-                                this.regenerateTiles();
-
-                                console.log("pos: delayed event added at checkmatch")
-                            }
-
-                        )
+                            break
+                        }
                     }
-
-
-                    j = game.tileGrid[i].length;
-
                 }
+
+                    //j = game.tileGrid[i].length;
             }
         }
     }
