@@ -651,6 +651,15 @@ class BaseLevel extends BaseState {
         return tileTypePool[rnd];
     }
 
+    timeoutRelease()
+    {
+        if(game.gameState == 'gotInput')
+        {
+            this.tileUp();
+        }
+        console.log("tile touch timed out");
+    }
+
     tileDown(tile) {
 
         //Prevent user: free swap by double clicking  
@@ -659,6 +668,11 @@ class BaseLevel extends BaseState {
             this.showDebugTile();
             return;
         }
+
+        let events = this.game.time.events
+        events.add(500, () => {
+            this.timeoutRelease();
+        })
 
         game.gameState = 'gotInput';
         //console.log("Game State: " + game.gameState);
