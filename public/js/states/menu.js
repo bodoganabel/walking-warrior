@@ -20,7 +20,7 @@ class Menu extends BaseState {
         tBuilder.writeLineToPos(1000, 1820, WW.updateDate);
 
         //Gombok felvétele
-        let button = this.game.add.button(80, 400, 'playbutton', this.startGame, this, 2, 1, 0);
+        let button = this.game.add.button(80, 400, 'playbutton', () => {this.startGame()}, this, 2, 1, 0);
         button.scale.setTo(1.2, 1.2);
 
         let infobutton = this.game.add.button(700, 400, 'infobutton', function () {
@@ -50,7 +50,10 @@ class Menu extends BaseState {
                 try {
                     let save = JSON.parse(data.data);
                     this.game.state.start(save.level, true, false, save);
+                    console.log("got data from server: ")
+                    console.log(data)
                 } catch (e) {
+                    console.log('did not got data from server, starting lv 1')
                     this.game.state.start('Level1');
                 }
             })

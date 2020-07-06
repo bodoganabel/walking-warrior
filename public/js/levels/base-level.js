@@ -8,15 +8,10 @@ class BaseLevel extends BaseState {
 
         //regex: game.tileGrid.*=
         this.gridSize = { w: 6, h: 9 };
-        game.tileGrid = new Array(this.gridSize.w);
-        for (let i = 0; i < this.gridSize.w; i++) {
-            game.tileGrid[i] = new Array(this.gridSize.h);
-            for (let j = 0; j < this.gridSize.h; j++) {
-                game.tileGrid[i][j] = { tileType: '-1' };
-            }
-        }
+        //game.TileGrid
+        game.tileGrid = new Array(this.gridSize.w); //Nulling the grid will happen at init()
 
-        console.log(game.tileGrid[1]);
+        //console.log(game.tileGrid[1]);
         this.tiles = [];
 
         this.tileTypes = LVL.tileTypes;
@@ -29,7 +24,7 @@ class BaseLevel extends BaseState {
 
         //to init
         this.score = null;
-        this.moves = null;
+        game.moves = null;
 
         //from globals
         this.dedicatedTileTypes = null;
@@ -62,32 +57,31 @@ class BaseLevel extends BaseState {
                 const keyName = event.key;
                 if (keyName == 'f') {
                     game.gameState = 'waitInput';
-                    console.log("Game forced into waitInput state.")
+                    //console.log("Game forced into waitInput state.")
                 }
 
                 if (keyName == 'd') {
 
-                    console.log("Game state: " + game.gameState);
-                    console.log("active tile1:")
-                    console.log(this.activeTile1);
-                    console.log("active tile1:")
-                    console.log(this.activeTile2);
+                    //console.log("Game state: " + game.gameState);
+                    //console.log("active tile1:")
+                    //console.log(this.activeTile1);
+                    //console.log("active tile1:")
+                    //console.log(this.activeTile2);
                 }
 
                 if (keyName == 'g') {
                     this.showDebugTile()
                 }
 
-                if (keyName == 'm')
-                {
-                    console.log("this.moves: "+ this.moves)
-                    this.moves
+                if (keyName == 'm') {
+                    //console.log("game.moves: " + game.moves)
+                    game.moves
                 }
 
-                if(keyName == 'M')
-                {
-                    this.moves+=10
-                    console.log("this.moves increased to: "+ this.moves)                }
+                if (keyName == 'M') {
+                    game.moves += 10
+                    //console.log("game.moves increased to: " + game.moves)
+                }
 
 
             }, false);
@@ -119,26 +113,39 @@ class BaseLevel extends BaseState {
     //END Abel bugfix
 
     init(savedData) {
+        console.log("init");
         let level = this.getLevel();
         this.dedicatedTileTypes = LVL[level].dedicatedTileTypes || [];
 
         //ha van savedData a mentésből, akkor abból initelünk
         if (typeof savedData == 'undefined') {
             this.tileState = null;
-            this.moves = LVL[level].moves;
+            game.moves = LVL[level].moves;
             this.score = 0;
+            console.log("type of saved data is undefined")
         } else {
             this.tileState = savedData.tileState;
-            this.moves = savedData.moves;
+            game.moves = savedData.moves;
             this.score = savedData.score;
             this.tile1Count == savedData.tile1Count;
             this.tile2Count == savedData.tile2Count;
             this.tile3Count == savedData.tile3Count;
+            console.log("type of saved data is anything but undefined")
+
         }
 
-        console.log("Whatcout!!!!!!!!!!!4");
+        //Null out tileGrid
+        for (let i = 0; i < this.gridSize.w; i++) {
+            game.tileGrid[i] = new Array(this.gridSize.h);
+            for (let j = 0; j < this.gridSize.h; j++) {
+                game.tileGrid[i][j] = { tileType: '-1' };
+            }
+        }
+
+        console.log("Wathcout!!!!!!!!!!!4");
         console.log(this.tileState);
-        console.log(game.tileGrid);
+        this.showDebugTile();
+
 
         this.ajaxPost('ajax.php', { action: 'beforeLevel' })
             .then((resp) => {
@@ -155,6 +162,7 @@ class BaseLevel extends BaseState {
     }
 
     beforeLevel(data) {
+        console.log("before level");
         let gameLevel = parseInt(data.gamelevel);
         //actual level
         let actLevel = parseInt(this.getLevelNumber());
@@ -174,6 +182,8 @@ class BaseLevel extends BaseState {
     }
 
     create() {
+        console.log("create");
+
         super.create();
 
 
@@ -224,7 +234,7 @@ class BaseLevel extends BaseState {
             return;
         }
 
-        if (this.moves <= 0) {
+        if (game.moves <= 0) {
             this.ajaxPost('ajax.php', { action: 'removeTokens' });
             this.game.state.start('Error', true, false, 'You have lost all your tokens. Open the WW Pedometer App and get a token by walking!');
             return;
@@ -242,7 +252,7 @@ class BaseLevel extends BaseState {
                 this.switchTiles();
             } else {
                 //call swapback
-                console.log("Swapping back because no match found.");
+                //console.log("Swapping back because no match found.");
                 this.swapTiles(() => { this.tileUp() });
             }
         }
@@ -285,7 +295,7 @@ class BaseLevel extends BaseState {
     }
 
     swapTiles(callback) {
-        console.log("swapping tiles")
+        //console.log("swapping tiles")
         if (this.activeTile1 && this.activeTile2) {
             //nomove tile check
             if (this.activeTile1.tileType == 14 || this.activeTile2.tileType == 14) {
@@ -344,14 +354,14 @@ class BaseLevel extends BaseState {
 
     checkMatch() {
         game.gameState = 'check';
-        console.log("Game state: " + game.gameState);
+        //console.log("Game state: " + game.gameState);
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
         let gotMatches = (matchGroups.length > 0) ? true : false;
 
         if (gotMatches) {
 
             game.gameState = 'remove';
-            console.log("Game state: " + game.gameState);
+            //console.log("Game state: " + game.gameState);
             this.decrementMoves();
             this.removeMatches(matchGroups);
             this.dropTiles();
@@ -371,8 +381,8 @@ class BaseLevel extends BaseState {
         if (game.EventsWaitingCounter > 0) {
             return false;
         }
-        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
-        console.log("so far so good")
+        //console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
+        //console.log("so far so good")
         this.showDebugTile();
 
         let events = this.game.time.events
@@ -448,14 +458,14 @@ class BaseLevel extends BaseState {
             }
         }
 
-        console.log("pos: remove tiles done. Grid:")
+        //console.log("pos: remove tiles done. Grid:")
         this.showDebugTile();
     }
 
 
 
     fillTiles() {
-        console.log("pos: fill tiles")
+        //console.log("pos: fill tiles")
 
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = 0; j < this.gridSize.h; ++j) {
@@ -465,7 +475,7 @@ class BaseLevel extends BaseState {
                 }
             }
         }
-        console.log("pos: after filled tiles")
+        //console.log("pos: after filled tiles")
     }
 
     dropTiles() {
@@ -475,43 +485,41 @@ class BaseLevel extends BaseState {
 
                 //Actual tile is zero
                 if (game.tileGrid[i][j].tileType == '-1') {
-                    console.log("found zero")
+                    //console.log("found zero")
                     //ha a legtetején vagyunk az oszlopnak
-                    if(j==0)
-                    {
+                    if (j == 0) {
 
                         game.EventsWaitingCounter++;
                         this.game.time.events.add(200, () => {
                             this.regenerateTiles("dropTiles")
                         })
                     }
-                    else
-                    {
+                    else {
                         for (let k = j - 1; k >= 0; k--) {
                             if (game.tileGrid[i][k].tileType != '-1') {
                                 let tempTile = game.tileGrid[i][k];
                                 game.tileGrid[i][k] = game.tileGrid[i][j];
                                 game.tileGrid[i][j] = tempTile;
-    
+
                                 let tween;
                                 tween = this.game.add.tween(tempTile)
                                 tween.to({
                                     y: this.tileHeight * j + (this.tileHeight / 2)
                                 }, 200, Phaser.Easing.Linear.In, true)
-    
+
                                 game.EventsWaitingCounter++;
                                 tween.onComplete.add(
                                     () => {
-                                        console.log("try call regenerateTiles")
+                                        //console.log("try call regenerateTiles")
                                         this.regenerateTiles("dropTiles")
                                     }
                                 )
-    
+
                                 break
                             }
                         }
                     }
-                    
+
                 }
 
                 //j = game.tileGrid[i].length;
@@ -524,7 +532,7 @@ class BaseLevel extends BaseState {
     getMatches(col, row) {
         let matches = ShapeMatcher.matchAll(game.tileGrid, col, row, this.gridSize.w, this.gridSize.h);
         if (matches.length > 0) {
-            console.log(matches);
+            //console.log(matches);
         }
 
         return matches;
@@ -540,9 +548,10 @@ class BaseLevel extends BaseState {
 
     setupTiles() {
         this.tiles = this.game.add.group();
+        //console.log("tileState to load map from: ")
+        //console.log(this.tileState);
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = 0; j < this.gridSize.h; ++j) {
-                console.log(`i: ${i} i: ${j} `)
                 //ha van tileStateünk mentésből, akkor abból töltjük fel a gridet
                 if (this.tileState == null) {
                     this.addTile(i, j);
@@ -552,9 +561,9 @@ class BaseLevel extends BaseState {
             }
         }
 
-        let me = this;
-        this.game.time.events.add(2000, () => {
-            if (!me.checkMatch()) {
+        let events = this.game.time.events
+        events.add(2000, () => {
+            if (!this.checkMatch('setup tiles')) {
                 this.tileUp();
             }
         })
@@ -616,13 +625,13 @@ class BaseLevel extends BaseState {
         if (game.EventsWaitingCounter > 0) {
             return false;
         }
-        console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
-        console.log("seems okay")
+        //console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
+        //console.log("seems okay")
 
         this.updateObjective();
         //check again if there is match. If no more, finish up the swipe.
         if (!this.checkMatch()) {
-            console.log("All regeneration finished.");
+            //console.log("All regeneration finished.");
             this.tileUp();
         }
     }
@@ -646,16 +655,16 @@ class BaseLevel extends BaseState {
 
         //Prevent user: free swap by double clicking  
         if (game.gameState != 'waitInput') {
-            console.log("click blocked");
+            //console.log("click blocked");
             this.showDebugTile();
             return;
         }
 
         game.gameState = 'gotInput';
-        console.log("Game State: " + game.gameState);
-        console.log("tile: ")
-        console.log(tile)
-        console.log()
+        //console.log("Game State: " + game.gameState);
+        //console.log("tile: ")
+        //console.log(tile)
+        //console.log()
 
         if (tile.tileType == 'potassium') {
             this.deleteRow(tile);
@@ -689,11 +698,11 @@ class BaseLevel extends BaseState {
             fill: "#ff2800"
         }).text = 'Moves:';
 
-        this.movesLabel = this.game.add.text(10, 120, "0", {
+        game.movesLabel = this.game.add.text(10, 120, "0", {
             font: '100px Acme',
             fill: "#ff2800"
         });
-        this.movesLabel.text = this.moves;
+        game.movesLabel.text = game.moves;
 
         //level
         this.game.add.text(10, 240, "0", {
@@ -727,13 +736,13 @@ class BaseLevel extends BaseState {
     }
 
     decrementMoves(minus = 1) {
-        this.moves -= minus;
-        this.movesLabel.text = this.moves;
+        game.moves -= minus;
+        game.movesLabel.text = game.moves;
     }
 
     incremenentMoves(plus = 1) {
-        this.moves += plus;
-        this.movesLabel.text = this.moves;
+        game.moves += plus;
+        game.movesLabel.text = game.moves;
     }
 
 
@@ -767,7 +776,7 @@ class BaseLevel extends BaseState {
     tileUp() {
 
         game.gameState = 'waitInput';
-        console.log("Simple switch done: has no match. Game state: " + game.gameState);
+        //console.log("Simple switch done: has no match. Game state: " + game.gameState);
         this.activeTile1 = this.activeTile2 = null;
     }
 
@@ -852,7 +861,7 @@ class BaseLevel extends BaseState {
     }
 
     saveGameState() {
-        console.log(game.tileGrid);
+        //console.log(game.tileGrid);
         let savedData = {};
         let tileState = [];
         for (var i = 0; i < this.gridSize.w; i++) {
@@ -865,7 +874,7 @@ class BaseLevel extends BaseState {
         savedData['tileState'] = tileState;
         savedData['level'] = this.getLevel();
         savedData['score'] = this.score;
-        savedData['moves'] = this.moves;
+        savedData['moves'] = game.moves;
         savedData['tile1Count'] = this.tile1Count;
         savedData['tile2Count'] = this.tile2Count;
         savedData['tile3Count'] = this.tile3Count;
