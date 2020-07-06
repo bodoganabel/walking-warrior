@@ -19,7 +19,7 @@ class Level2 extends BaseLevel {
 
     updateObjective() {
         const count = this.counter.get('L-shape') + this.counter.get('T-shape');
-        this.objectiveLabel.text = `Make 3 L or T shapes. 3/${count}`;
+        this.objectiveLabel.text = `Make 3 L or T shapes. ${count}/3`;
     }
 
     // removeMatches(matchGroups) {

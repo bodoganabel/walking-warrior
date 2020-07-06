@@ -134,19 +134,6 @@ class BaseLevel extends BaseState {
 
         }
 
-        //Null out tileGrid
-        for (let i = 0; i < this.gridSize.w; i++) {
-            game.tileGrid[i] = new Array(this.gridSize.h);
-            for (let j = 0; j < this.gridSize.h; j++) {
-                game.tileGrid[i][j] = { tileType: '-1' };
-            }
-        }
-
-        console.log("Wathcout!!!!!!!!!!!4");
-        console.log(this.tileState);
-        this.showDebugTile();
-
-
         this.ajaxPost('ajax.php', { action: 'beforeLevel' })
             .then((resp) => {
 
@@ -547,6 +534,19 @@ class BaseLevel extends BaseState {
     }
 
     setupTiles() {
+
+        //Null out tileGrid
+        for (let i = 0; i < this.gridSize.w; i++) {
+            game.tileGrid[i] = new Array(this.gridSize.h);
+            for (let j = 0; j < this.gridSize.h; j++) {
+                game.tileGrid[i][j] = { tileType: '-1' };
+            }
+        }
+
+        console.log("Wathcout!!!!!!!!!!!4");
+        console.log(this.tileState);
+        this.showDebugTile();
+
         this.tiles = this.game.add.group();
         //console.log("tileState to load map from: ")
         //console.log(this.tileState);
@@ -666,6 +666,9 @@ class BaseLevel extends BaseState {
         //console.log(tile)
         //console.log()
 
+        this.clickedPos.x = (tile.x - this.tileOffset - this.tileWidth / 2) / this.tileWidth;
+        this.clickedPos.y = (tile.y - this.tileHeight / 2) / this.tileHeight;
+
         if (tile.tileType == 'potassium') {
             this.deleteRow(tile);
             return;
@@ -686,9 +689,6 @@ class BaseLevel extends BaseState {
         this.activeTile1 = tile;
 
 
-
-        this.clickedPos.x = (tile.x - this.tileOffset - this.tileWidth / 2) / this.tileWidth;
-        this.clickedPos.y = (tile.y - this.tileHeight / 2) / this.tileHeight;
     }
 
     createUi() {
@@ -805,7 +805,7 @@ class BaseLevel extends BaseState {
 
     deleteTile(tile) {
         this.removeTile(tile);
-        this.addTile(pos.x, pos.y, 0);
+        this.addTile(this.getTilePos(tile).x, this.getTilePos(tile).y, 0);
 
 
         this.game.time.events.add(650, () => {
@@ -852,6 +852,7 @@ class BaseLevel extends BaseState {
 
     deleteCol(tile) {
         let pos = this.getTilePos(tile);
+        console.log(pos)
 
         for (let i = 0; i < this.gridSize.h; i++) {
             this.deleteTile(game.tileGrid[pos.x][i]);
