@@ -78,6 +78,18 @@ class BaseLevel extends BaseState {
                     this.showDebugTile()
                 }
 
+                if (keyName == 'm')
+                {
+                    console.log("this.moves: "+ this.moves)
+                    this.moves
+                }
+
+                if(keyName == 'M')
+                {
+                    this.moves+=10
+                    console.log("this.moves increased to: "+ this.moves)                }
+
+
             }, false);
 
         }
@@ -124,6 +136,9 @@ class BaseLevel extends BaseState {
             this.tile3Count == savedData.tile3Count;
         }
 
+        console.log("Whatcout!!!!!!!!!!!4");
+        console.log(this.tileState);
+        console.log(game.tileGrid);
 
         this.ajaxPost('ajax.php', { action: 'beforeLevel' })
             .then((resp) => {
@@ -538,7 +553,7 @@ class BaseLevel extends BaseState {
         }
 
         let me = this;
-        this.game.time.events.add(650, () => {
+        this.game.time.events.add(2000, () => {
             if (!me.checkMatch()) {
                 this.tileUp();
             }
