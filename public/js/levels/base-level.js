@@ -225,7 +225,7 @@ class BaseLevel extends BaseState {
 
         if (game.moves <= 0) {
             this.ajaxPost('ajax.php', { action: 'removeTokens' });
-            this.game.state.start('Error', true, false, 'You have lost all your tokens. Open the WW Pedometer App and get a token by walking!');
+            this.game.state.start('Error', true, false, 'You have lost all your moves.');
             return;
         }
     }
