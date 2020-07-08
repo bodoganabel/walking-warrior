@@ -7,7 +7,7 @@ class ButtonBuilder {
     createLevelButton(posX, posY, key, levelName) {
         //game.add.button(100, 560, '1button', actionOnClick4, this, 2, 1, 0);
         this.phaser.add.button(posX, posY, key, function(){
-            this.game.state.start(levelName)
+            this.game.state.start(levelName, true, false)
         }, this.context)
     }
 

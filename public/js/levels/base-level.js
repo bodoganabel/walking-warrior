@@ -92,6 +92,8 @@ class BaseLevel extends BaseState {
         //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
         // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
         game.EventsWaitingCounter = 0;
+        game.timeoutReleaseEventsWaitingCounter = 0;
+
 
     }
 
@@ -228,9 +230,19 @@ class BaseLevel extends BaseState {
         }
     }
 
+    //After pla
     afterSwap() {
         //csere után megnézzük, hogy van-e match a grid-ben
-        let hasMatch = this.checkMatch()
+        game.EventsWaitingCounter--
+        if(game.EventsWaitingCounter>0)
+        {
+            return
+        }
+
+        game.gameState='afterSwap'
+
+        game.EventsWaitingCounter++;
+        let hasMatch = this.checkMatch('afterSwap')
 
         //If no match at all
         if (!hasMatch) {
@@ -239,8 +251,8 @@ class BaseLevel extends BaseState {
                 this.switchTiles();
             } else {
                 //call swapback
-                //console.log("Swapping back because no match found.");
-                this.swapTiles(() => { this.tileUp() });
+                console.log("Swapping back because no match found.");
+                this.swapTiles();
             }
         }
     }
@@ -274,15 +286,16 @@ class BaseLevel extends BaseState {
 
             //megnézzük, hogy a user elhuzta-e az ujjat legalább egy tile szélességre vagy magasságra
             if ((Math.abs(diff.x) == 1 && diff.y == 0) || (Math.abs(diff.y) == 1 && diff.x == 0)) {
+                game.gameState='swappingToCheck';
                 this.activeTile2 = game.tileGrid[hoverPos.x][hoverPos.y];
-                this.swapTiles(() => { this.afterSwap() });
+                this.swapTiles();
             }
         }
 
     }
 
-    swapTiles(callback) {
-        //console.log("swapping tiles")
+    swapTiles() {
+
         if (this.activeTile1 && this.activeTile2) {
             //nomove tile check
             if (this.activeTile1.tileType == 14 || this.activeTile2.tileType == 14) {
@@ -332,22 +345,50 @@ class BaseLevel extends BaseState {
 
             this.activeTile1 = game.tileGrid[t1Index.x][t1Index.y];
             this.activeTile2 = game.tileGrid[t2Index.x][t2Index.y];
-            if (callback) {
-                tween.onComplete.add(callback)
+            //is this first swap of actual player action?
+            if (game.gameState=='swappingToCheck') {
+                game.EventsWaitingCounter++;
+                tween.onComplete.add(
+                    () => {
+                        this.afterSwap()
+                    }
+                )
+            }
+            else if (game.gameState=='afterSwap')
+            {
+                //Finish up player action after second swap(swapback)
+                tween.onComplete.add(
+                    () => {
+                        this.tileUp('swapTiles: after swapping back')
+                    }
+                )
             }
 
         }
+        else
+        {
+            console.log("ERROR no active tiles!");
+            //this.tileUp('after swap-> swap tiles');
+        }
     }
 
-    checkMatch() {
-        game.gameState = 'check';
+    checkMatch(whoCalledMe) {
+        
+        game.EventsWaitingCounter--;
+        if (game.EventsWaitingCounter > 0) {
+            return false;
+        }
+        if(whoCalledMe)
+        {
+            console.log("Check called by: "+ whoCalledMe);
+        }
         //console.log("Game state: " + game.gameState);
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
         let gotMatches = (matchGroups.length > 0) ? true : false;
 
         if (gotMatches) {
 
-            game.gameState = 'remove';
+            game.gameState = 'noMatch';
             //console.log("Game state: " + game.gameState);
             this.decrementMoves();
             this.removeMatches(matchGroups);
@@ -362,7 +403,7 @@ class BaseLevel extends BaseState {
     }
 
 
-    regenerateTiles(whoCallsMe) {
+    regenerateTiles(whoCalledMe) {
 
         game.EventsWaitingCounter--;
         if (game.EventsWaitingCounter > 0) {
@@ -372,6 +413,7 @@ class BaseLevel extends BaseState {
         //console.log("so far so good")
         this.showDebugTile();
 
+        game.gameState='regenerate'
         let events = this.game.time.events
         events.add(300, () => {
             this.fillTiles();
@@ -385,6 +427,8 @@ class BaseLevel extends BaseState {
 
     removeMatches(matchGroups) {
         if (matchGroups.length < 1) return;
+
+        game.gameState = 'remove';
 
         for (let group of matchGroups) {
 
@@ -466,6 +510,8 @@ class BaseLevel extends BaseState {
     }
 
     dropTiles() {
+
+        game.gameState = 'drop'
 
         for (let i = this.gridSize.w - 1; i >= 0; i--) {
             for (let j = this.gridSize.h - 1; j >= 0; --j) {
@@ -563,7 +609,8 @@ class BaseLevel extends BaseState {
 
         let events = this.game.time.events
         events.add(2000, () => {
-            if (!this.checkMatch('setup tiles')) {
+            game.EventsWaitingCounter++;
+            if (!this.checkMatch('setupTiles')) {
                 this.tileUp();
             }
         })
@@ -629,8 +676,10 @@ class BaseLevel extends BaseState {
         //console.log("seems okay")
 
         this.updateObjective();
-        //check again if there is match. If no more, finish up the swipe.
-        if (!this.checkMatch()) {
+
+        //check again if there is match. If no more, finish up the player action aka. "the swipe".
+        game.EventsWaitingCounter++;
+        if (!this.checkMatch('checkNewMatchesAfterRegeneration')) {
             //console.log("All regeneration finished.");
             this.tileUp();
         }
@@ -653,28 +702,32 @@ class BaseLevel extends BaseState {
 
     timeoutRelease()
     {
+        game.timeoutReleaseEventsWaitingCounter--;
+        if(game.timeoutReleaseEventsWaitingCounter > 0)
+        {
+            return;
+        }
         if(game.gameState == 'gotInput')
         {
+            console.log("tile touch timed out");
             this.tileUp();
         }
-        console.log("tile touch timed out");
     }
 
     tileDown(tile) {
 
         //Prevent user: free swap by double clicking  
         if (game.gameState != 'waitInput') {
-            //console.log("click blocked");
-            this.showDebugTile();
+            console.log("click blocked");
             return;
         }
 
         let events = this.game.time.events
         events.add(500, () => {
+            game.timeoutReleaseEventsWaitingCounter++;
             this.timeoutRelease();
         })
 
-        game.gameState = 'gotInput';
         //console.log("Game State: " + game.gameState);
         //console.log("tile: ")
         //console.log(tile)
@@ -684,11 +737,13 @@ class BaseLevel extends BaseState {
         this.clickedPos.y = (tile.y - this.tileHeight / 2) / this.tileHeight;
 
         if (tile.tileType == 'potassium') {
+            game.gameState='deleteRowByPotassium'
             this.deleteRow(tile);
             return;
         }
 
         if (tile.tileType == 'magnesium') {
+            game.gameState='deleteColumnByMagnesium'
             this.deleteCol(tile);
             return;
         }
@@ -700,6 +755,7 @@ class BaseLevel extends BaseState {
             return;
         }
 
+        game.gameState = 'gotInput';
         this.activeTile1 = tile;
 
 
@@ -787,10 +843,12 @@ class BaseLevel extends BaseState {
     }
 
     //Release all tiles, waiting for new user input.
-    tileUp() {
-
+    tileUp(whoCalledMe) {
+        if(whoCalledMe)
+        {
+            console.log("tileUp called by: " + whoCalledMe);
+        } 
         game.gameState = 'waitInput';
-        //console.log("Simple switch done: has no match. Game state: " + game.gameState);
         this.activeTile1 = this.activeTile2 = null;
     }
 
@@ -823,8 +881,9 @@ class BaseLevel extends BaseState {
 
 
         this.game.time.events.add(650, () => {
-            if (!this.checkMatch()) {
-                this.tileUp();
+            game.EventsWaitingCounter++;
+            if (!this.checkMatch('deleteTile')) {
+                this.tileUp('delete tile');
             }
         });
     }
