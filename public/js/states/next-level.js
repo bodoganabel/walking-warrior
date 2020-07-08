@@ -31,6 +31,6 @@ class NextLevel extends BaseState {
     }
 
     startNextLevel() {
-        this.game.state.start('Level' + this.nextLevel);
+        this.game.state.start('Level' + this.nextLevel, true, false);
     }
 }
