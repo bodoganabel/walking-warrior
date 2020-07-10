@@ -1,7 +1,6 @@
 class BaseLevel extends BaseState {
     constructor(game) {
         super(game);
-        game.score = 0;
         this.tileOffset = 200;
         this.tileHeight = this.tileWidth = 200;
 
@@ -9,7 +8,6 @@ class BaseLevel extends BaseState {
         //regex: game.tileGrid.*=
         this.gridSize = { w: 6, h: 9 };
         //game.TileGrid
-        game.tileGrid = new Array(this.gridSize.w); //Nulling the grid will happen at init()
 
         //console.log(game.tileGrid[1]);
         this.tiles = [];
@@ -23,15 +21,13 @@ class BaseLevel extends BaseState {
         this.activeTile1 = this.activeTile2 = null;
 
         //to init
-        game.score = null;
-        game.moves = null;
+
 
         //from globals
         this.dedicatedTileTypes = null;
         this.scoreToFinish = null;
 
         this.tileState = null;
-        game.counter = new ScoreCounter();
 
         /*
             Abel's bugfix
@@ -46,7 +42,7 @@ class BaseLevel extends BaseState {
 
 
         //force reset state to waitInput
-        game.gameState = 'waitInput'; //It can be: waitInput
+
 
         //force unblock user input
         if (!game.addedDebugKeys) {
@@ -88,14 +84,6 @@ class BaseLevel extends BaseState {
 
         }
 
-
-        //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
-        // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
-        game.EventsWaitingCounter = 0;
-        game.timeoutReleaseEventsWaitingCounter = 0;
-        game.NextLevelEventsCounter = 0;
-
-
     }
 
     showDebugTile() {
@@ -119,6 +107,21 @@ class BaseLevel extends BaseState {
     //Very first function when changing scene
     init(savedData) {
         console.log("init");
+
+        //These globals must reset on every new level.
+
+        game.counter = new ScoreCounter();
+        game.moves = null;
+        game.score = 0;
+        game.tileGrid = new Array(this.gridSize.w); //Nulling the grid will happen at init()
+        game.gameState = 'waitInput'; //It can be: waitInput
+        //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
+        // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
+        game.EventsWaitingCounter = 0;
+        game.timeoutReleaseEventsWaitingCounter = 0;
+        game.NextLevelEventsCounter = 0;
+
+
         let level = this.getLevel();
         this.dedicatedTileTypes = LVL[level].dedicatedTileTypes || [];
 
@@ -260,7 +263,7 @@ class BaseLevel extends BaseState {
 
                                 }
                                 else {
-                                    this.game.state.start('Error', true, false, 'Congratulations! You cleared all levels so far. In order to unlock the next level, please walk 500 steps with the Pedometer app and earn 1 token.');
+                                    this.game.state.start('Error', true, false, 'Congratulations!\n You cleared all levels so far.\n In order to unlock the next level, please walk 20 steps with the Pedometer app and earn 1 token.');
                                 }
                             }
                             else {
