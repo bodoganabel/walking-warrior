@@ -15,14 +15,14 @@ class Level17 extends TokenLevel {
     // }
 
     isCompleted() {
-        const c1 = this.counter.get('bonus-count');
-        const c2 = this.counter.get('L-shape') + this.counter.get('T-shape');
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
         return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c1 = this.counter.get('bonus-count');
-        const c2 = this.counter.get('L-shape') + this.counter.get('T-shape');
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
         this.objectiveLabel.text = `${c1}/2 bonustiles, ${c2}/2 L or Ts`;
     }
 

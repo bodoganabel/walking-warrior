@@ -14,11 +14,11 @@ class Level2 extends BaseLevel {
     // }
 
     isCompleted() {
-        return this.counter.get('L-shape') + this.counter.get('T-shape') >= this.scoreToFinish;
+        return game.counter.get('L-shape') + game.counter.get('T-shape') >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const count = this.counter.get('L-shape') + this.counter.get('T-shape');
+        const count = game.counter.get('L-shape') + game.counter.get('T-shape');
         this.objectiveLabel.text = `Make 3 L or T shapes. ${count}/3`;
     }
 

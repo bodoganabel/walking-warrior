@@ -21,16 +21,16 @@ class Level14 extends TokenLevel {
     }
 
     isCompleted() {
-        const c1 = this.counter.get('1-match') + this.counter.get('7-match');
-        const c2 = this.counter.get('4-match') + this.counter.get('10-match');
-        const c3 = this.counter.get('5-match') + this.counter.get('11-match');
+        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
+        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
+        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
         return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish && c3 >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c1 = this.counter.get('1-match') + this.counter.get('7-match');
-        const c2 = this.counter.get('4-match') + this.counter.get('10-match');
-        const c3 = this.counter.get('5-match') + this.counter.get('11-match');
+        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
+        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
+        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
         this.objectiveLabel.text = `Match        ${c1}/20           ${c2}/20          ${c3}/20`;
     }
 

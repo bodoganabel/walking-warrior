@@ -14,12 +14,12 @@ class Level9 extends TokenLevel {
     }
 
     isCompleted() {
-        const c = this.counter.get('4-match') + this.counter.get('10-match');
+        const c = game.counter.get('4-match') + game.counter.get('10-match');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = this.counter.get('4-match') + this.counter.get('10-match');
+        const c = game.counter.get('4-match') + game.counter.get('10-match');
         this.objectiveLabel.text = `Match               ${c}/30`;
     }
 

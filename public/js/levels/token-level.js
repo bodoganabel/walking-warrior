@@ -14,12 +14,6 @@ class TokenLevel extends BaseLevel {
         if (parseInt(data.tester) === 1) {
             return;
         }
-
-
-        if (parseInt(data.tokens) < 1) {
-            this.game.state.start('Error', true, false, 'You have lost all your tokens. Open the WW Pedometer App and get a token by walking!');
-            return;
-        }
     }
 
     createUi() {

@@ -7,12 +7,12 @@ class Level16 extends TokenLevel {
     }
 
     isCompleted() {
-        const c = this.counter.get('bonus-count');
+        const c = game.counter.get('bonus-count');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = this.counter.get('bonus-count');
+        const c = game.counter.get('bonus-count');
         this.objectiveLabel.text = `Make 6 bonustiles ${c}/6`;
     }
 

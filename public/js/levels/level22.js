@@ -7,12 +7,12 @@ class Level22 extends TokenLevel {
     }
 
     isCompleted() {
-        const c = this.counter.get('5-in-a-row');
+        const c = game.counter.get('5-in-a-row');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = this.counter.get('5-in-a-row');
+        const c = game.counter.get('5-in-a-row');
         this.objectiveLabel.text = `Make 2 5-in-a-row ${c}/2`;
     }
 

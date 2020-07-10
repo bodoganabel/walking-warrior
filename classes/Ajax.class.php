@@ -55,4 +55,14 @@ class Ajax {
 
         return $db->query("SELECT id, username, tokens, steps, score, created_at, tm, gamelevel FROM users ORDER BY id");
     }
+
+    public static function getToken() {
+        $db = Database::connect();
+        $user_id = $_SESSION['user_id'];
+
+        $stmt = $db->prepare("SELECT tokens FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+
+        return $stmt->fetch()[0];
+    }
 }

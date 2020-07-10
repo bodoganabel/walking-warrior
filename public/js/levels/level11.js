@@ -14,12 +14,12 @@ class Level11 extends TokenLevel {
     // }
 
     isCompleted() {
-        const c = this.counter.get('L-shape') + this.counter.get('T-shape');
+        const c = game.counter.get('L-shape') + game.counter.get('T-shape');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = this.counter.get('L-shape') + this.counter.get('T-shape');
+        const c = game.counter.get('L-shape') + game.counter.get('T-shape');
         this.objectiveLabel.text = `Make 5 L or T shapes. 5/${c}`;
     }
 

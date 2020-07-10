@@ -11,7 +11,7 @@ class Level23 extends TokenLevel {
     }
 
     isCompleted() {
-        const c = this.counter.get('neighbouring-bonus-count');
+        const c = game.counter.get('neighbouring-bonus-count');
         return c == this.scoreToFinish;
     }
 
@@ -32,7 +32,7 @@ class Level23 extends TokenLevel {
         for (let i = 0; i < this.gridSize.w - 1; ++i) {
             for (let j = 0; j < this.gridSize.h - 1; ++j) {
                 if (this.hasNeighbouringBonusTile(game.tileGrid[i][j])) {
-                    this.counter.increment('neighbouring-bonus-count');
+                    game.counter.increment('neighbouring-bonus-count');
                     return;
                 }
             }
