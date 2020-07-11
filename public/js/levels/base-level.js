@@ -114,7 +114,7 @@ class BaseLevel extends BaseState {
         game.moves = null;
         game.score = 0;
         game.tileGrid = new Array(this.gridSize.w); //Nulling the grid will happen at init()
-        game.gameState = 'waitInput'; //It can be: waitInput
+        game.gameState = 'setupLevel'; //It describes the actual state of game. It's needeed to identify program state at swiping tiles, swiping back tiles, check matches, removing, regenerating etc...
         game.unlockNextLevelIfGetToken; // Player gets this if cleared actual level, but can't play next level because he need to walk. Initialized below.
         //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
         // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
@@ -155,6 +155,8 @@ class BaseLevel extends BaseState {
                     alert('Oops, something went wrong when fetching data from the server. Response was false');
                 }
             })
+
+        //After init(), create() is called. LEARN MORE: at Phaser 2's documentation (State); https://phaser.io/docs/2.3.0/Phaser.State.html
     }
 
     beforeLevel(data) {
@@ -206,13 +208,8 @@ class BaseLevel extends BaseState {
                                     else
                                     {
                                         this.game.state.start('Error', true, false, 'Lost connection to server.');
-
                                     }
-                                    
-                                }
-                                
-                            );
-
+                                });
                             }
                             else
                             {
@@ -705,7 +702,7 @@ class BaseLevel extends BaseState {
             }
         }
 
-        console.log("Wathcout!!!!!!!!!!!4");
+        console.log("Tile States at 'setupTiles()': ");
         console.log(this.tileState);
         this.showDebugTile();
 
@@ -723,13 +720,9 @@ class BaseLevel extends BaseState {
             }
         }
 
-        let events = this.game.time.events
-        events.add(2000, () => {
-            game.EventsWaitingCounter++;
-            if (!this.checkMatch('setupTiles')) {
+        if (!this.checkMatch('setupTiles')) {
                 this.tileUp();
             }
-        })
     }
 
     addTile(i, j, type = 0) {
