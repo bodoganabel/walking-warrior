@@ -248,6 +248,12 @@ class BaseLevel extends BaseState {
         musicPlayer.playAudio('game');
 
         let button = this.game.add.button(10, 1600, 'backbutton', function () {
+
+            if(game.gameState !="waitInput")
+            {
+                return;
+            }
+    
             this.saveGameState();
             this.game.state.start('Menu');
         }, this, 2, 1, 0);
@@ -968,6 +974,12 @@ class BaseLevel extends BaseState {
     }
 
     deleteClick() {
+
+        if(game.gameState !="waitInput")
+        {
+            return;
+        }
+
         let me = this;
         if (me.deleteOn) {
             me.deleteOn = false;
@@ -1000,6 +1012,12 @@ class BaseLevel extends BaseState {
     }
 
     switchClick() {
+
+        if(game.gameState !="waitInput")
+        {
+            return;
+        }
+
         let me = this;
         if (me.switchOn) {
             me.switchOn = false;
