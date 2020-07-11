@@ -54,7 +54,7 @@ class Menu extends BaseState {
                     console.log(data)
                 } catch (e) {
                     console.log('did not got data from server, starting lv 1')
-                    this.game.state.start('Level1');
+                    this.game.state.start('Level1',true,false);
                 }
             })
             .catch(error => {

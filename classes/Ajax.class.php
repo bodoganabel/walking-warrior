@@ -6,7 +6,7 @@ class Ajax {
         $db = Database::connect();
         $user_id = $_SESSION['user_id'];
         
-        $stmt = $db->prepare("SELECT tester, tokens, gamelevel FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT tester, tokens, gamelevel, last_saved_state  FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
 
         return $stmt->fetch();

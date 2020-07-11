@@ -115,6 +115,7 @@ class BaseLevel extends BaseState {
         game.score = 0;
         game.tileGrid = new Array(this.gridSize.w); //Nulling the grid will happen at init()
         game.gameState = 'waitInput'; //It can be: waitInput
+        game.unlockNextLevelIfGetToken; // Player gets this if cleared actual level, but can't play next level because he need to walk. Initialized below.
         //If you add multiple timed effect, you need to identify which one finishes last in order to continue the program.
         // if more events are awaiting, then each call only decreases this number below, and only at the last call will the function be executed.
         game.EventsWaitingCounter = 0;
@@ -130,6 +131,7 @@ class BaseLevel extends BaseState {
             this.tileState = null;
             game.moves = LVL[level].moves;
             game.score = 0;
+            game.unlockNextLevelIfGetToken = 0;
             console.log("type of saved data is undefined")
         } else {
             this.tileState = savedData.tileState;
@@ -138,6 +140,8 @@ class BaseLevel extends BaseState {
             this.tile1Count == savedData.tile1Count;
             this.tile2Count == savedData.tile2Count;
             this.tile3Count == savedData.tile3Count;
+            game.unlockNextLevelIfGetToken = savedData.unlockNextLevelIfGetToken;
+            ; // Player gets this if cleared actual level, but can't play next level because he need to walk.
             console.log("type of saved data is anything but undefined")
 
         }
@@ -145,14 +149,11 @@ class BaseLevel extends BaseState {
         this.ajaxPost('ajax.php', { action: 'beforeLevel' })
             .then((resp) => {
 
-                if (resp.success == true) {
+                if (resp.success) {
                     this.beforeLevel(resp.data);
                 } else {
-                    alert('Oops, something went wrong when fetching data from the server.');
+                    alert('Oops, something went wrong when fetching data from the server. Response was false');
                 }
-            })
-            .catch((error) => {
-                alert('Oops, something went wrong when fetching data from the server.');
             })
     }
 
@@ -166,13 +167,76 @@ class BaseLevel extends BaseState {
             return;
         }
 
-        if (gameLevel < actLevel) {
-            this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
-            return;
+
+        //Getting saved "UnlockedNext" value.error
+
+        try {
+            let saveData = JSON.parse(data.last_saved_state);
+
+            console.log("Got unlockNextLevelIfGetToken below: ")
+            game.unlockNextLevelIfGetToken = saveData.unlockNextLevelIfGetToken;
+            console.log(saveData);
+            console.log(saveData.unlockNextLevelIfGetToken);
+        }
+        catch (e) {
+            console.log("Don't have any savedata from server")
         }
 
 
-    }
+
+        //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
+        if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1)) {
+
+            let hastoken = (data.tokens == 1) ? true : false;
+                if (hastoken) {
+                    this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
+                        (resp) => {
+                            if(resp.success)
+                            {
+                            this.ajaxPost('ajax.php', { action: 'updateLevel', level: actLevel }).then(
+                                (resp) => {
+                                    if(resp.success)
+                                    {
+                                        game.unlockNextLevelIfGetToken = 0;
+                                        this.saveGameState();
+                                        console.log("Should have started")
+                                        return;
+                                        //Continue game;
+                                    }
+                                    else
+                                    {
+                                        this.game.state.start('Error', true, false, 'Lost connection to server.');
+
+                                    }
+                                    
+                                }
+                                
+                            );
+
+                            }
+                            else
+                            {
+                                this.game.state.start('Error', true, false, 'Cannot connect to server.');
+                            }
+                        }
+                    );
+
+                }
+                else {
+                    this.game.state.start('Error', true, false, 'In order to unlock this level, please walk 20 steps with the Pedometer app and earn 1 token.');
+                }
+
+
+
+        }
+        else if (gameLevel < actLevel) {
+            console.log(game.unlockNextLevelIfGetToken + "\n " + gameLevel + "\n " + actLevel)
+            this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
+            return;
+        }
+    };
+
+
 
     getLevel() {
         return this.constructor.name;
@@ -206,8 +270,6 @@ class BaseLevel extends BaseState {
 
         this.setupTiles();
         this.checkScore();
-        console.log("level loaded successful. Saving data...")
-        this.saveGameState();
     }
 
     isCompleted() {
@@ -240,7 +302,7 @@ class BaseLevel extends BaseState {
                     this.ajaxPost('ajax.php', { action: 'getToken' }).then(
                         (resp) => {
                             if (resp.success) {
-                                hastoken = (resp.data == 1)?true:false;
+                                hastoken = (resp.data == 1) ? true : false;
                                 console.log("Finished level. User token: ");
                                 console.log(hastoken);
                                 console.log(resp.data);
@@ -263,6 +325,8 @@ class BaseLevel extends BaseState {
 
                                 }
                                 else {
+                                    game.unlockNextLevelIfGetToken = 1;
+                                    this.saveGameState();
                                     this.game.state.start('Error', true, false, 'Congratulations!\n You cleared all levels so far.\n In order to unlock the next level, please walk 20 steps with the Pedometer app and earn 1 token.');
                                 }
                             }
@@ -1000,12 +1064,24 @@ class BaseLevel extends BaseState {
         savedData['tile1Count'] = this.tile1Count;
         savedData['tile2Count'] = this.tile2Count;
         savedData['tile3Count'] = this.tile3Count;
+        savedData['unlockNextLevelIfGetToken'] = game.unlockNextLevelIfGetToken;
 
 
         this.ajaxPost('ajax.php', {
             action: 'saveGameState',
             data: JSON.stringify(savedData)
-        });
+        }).then((resp) => {
+            if(resp.success)
+            {
+                console.log("\n\n Game saved \n\n");
+            }
+            else
+            {
+                console.log("\n\n Game saving failure \n\n");
+
+            }
+        }
+        );
     }
 
 }
