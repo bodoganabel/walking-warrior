@@ -190,38 +190,34 @@ class BaseLevel extends BaseState {
         if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1)) {
 
             let hastoken = (data.tokens == 1) ? true : false;
-                if (hastoken) {
-                    this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
-                        (resp) => {
-                            if(resp.success)
-                            {
+            if (hastoken) {
+                this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
+                    (resp) => {
+                        if (resp.success) {
                             this.ajaxPost('ajax.php', { action: 'updateLevel', level: actLevel }).then(
                                 (resp) => {
-                                    if(resp.success)
-                                    {
+                                    if (resp.success) {
                                         game.unlockNextLevelIfGetToken = 0;
                                         this.saveGameState();
                                         console.log("Should have started")
                                         return;
                                         //Continue game;
                                     }
-                                    else
-                                    {
+                                    else {
                                         this.game.state.start('Error', true, false, 'Lost connection to server.');
                                     }
                                 });
-                            }
-                            else
-                            {
-                                this.game.state.start('Error', true, false, 'Cannot connect to server.');
-                            }
                         }
-                    );
+                        else {
+                            this.game.state.start('Error', true, false, 'Cannot connect to server.');
+                        }
+                    }
+                );
 
-                }
-                else {
-                    this.game.state.start('Error', true, false, 'In order to unlock this level, please walk 20 steps with the Pedometer app and earn 1 token.');
-                }
+            }
+            else {
+                this.game.state.start('Error', true, false, 'In order to unlock this level, please walk 20 steps with the Pedometer app and earn 1 token.');
+            }
 
 
 
@@ -249,11 +245,10 @@ class BaseLevel extends BaseState {
 
         let button = this.game.add.button(10, 1600, 'backbutton', function () {
 
-            if(game.subState !="waitInput")
-            {
+            if (game.subState != "waitInput") {
                 return;
             }
-    
+
             this.saveGameState();
             this.game.state.start('Menu');
         }, this, 2, 1, 0);
@@ -272,7 +267,6 @@ class BaseLevel extends BaseState {
         }
 
         this.setupTiles();
-        this.checkScore();
     }
 
     isCompleted() {
@@ -280,22 +274,16 @@ class BaseLevel extends BaseState {
     }
 
     checkScore() {
-        //lépések és pontok ellenőerzése
-        console.log("checkin score")
+
+        //If win
         if (this.isCompleted()) {
             if (this.getLevel() == 'SandBox') {
                 this.game.state.start('Menu');
                 return;
             }
 
-            game.NextLevelEventsCounter++
             this.game.time.events.add(400, () => {
 
-                game.NextLevelEventsCounter--;
-
-                if (game.NextLevelEventsCounter > 0) {
-                    return;
-                }
                 console.log("Executing next level validation process...\n\n")
                 let nextLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
                 this.saveGameState();
@@ -345,26 +333,39 @@ class BaseLevel extends BaseState {
             return;
         }
 
-        if (game.moves <= 0) {
+        //If lose
+        else if (game.moves <= 0) {
             this.game.state.start('Error', true, false, 'You have lost all your moves.');
             return;
+        }
+
+        //Continue game
+        else {
+            game.checkedScore = true;
+            this.endSubState()
         }
     }
 
     update() {
 
-        if(game.subState == 'subStateEnded') //Controlling game states
+        if (game.subState == 'subStateEnded') //Controlling game states
         {
-            if(game.afterSwap_WE)
-            {
-                game.afterSwap_WE = false;
+
+            if (game.endSetup) {
+                game.endSetup = false;
+                game.subState='checkAfterDrop'
+                this.checkMatch('checkAfterInitialSpawn');
+
+            }
+
+            if (game.afterSwap) {
+                game.afterSwap = false;
                 game.subState = 'firstCheck';
                 this.checkMatch('firstCheck');
             }
 
             //
-            if(game.addedBonusTile || game.noMoreBonus)
-            {
+            if (game.addedBonusTile || game.noMoreBonus) {
                 game.addTileFinished = false;
                 game.noMoreBonus = false;
                 //Call Drop event
@@ -372,31 +373,33 @@ class BaseLevel extends BaseState {
                 this.dropTiles();
             }
 
-            if(game.checkAfterDrop)
-            {
+            if (game.checkAfterDrop) {
                 game.checkAfterDrop = false;
                 game.subState = 'checkAfterDrop'
                 this.checkMatch('checkAfterDrop');
             }
 
-            if(game.regenerate)
-            {
+            if (game.regenerate) {
                 game.regenerate = false
                 game.subState = 'regenerate'
                 this.regenerateTiles();
             }
 
-            if(game.checkAfterRegenerate)
-            {
+            if (game.checkAfterRegenerate) {
                 game.checkAfterRegenerate = false;
                 game.subState = 'checkAfterRegenerate'
                 this.checkMatch('checkAfterRegenerate');
             }
 
-            if(game.noAnyOtherMatch)
-            {
+            if (game.noAnyOtherMatch) {
                 game.noAnyOtherMatch = false;
-                :TBD //call checkscore then release tile
+                game.subState = 'checkScore'
+                this.checkScore(); //call checkscore then release tile
+            }
+
+            if (game.checkedScore) {
+                game.checkedScore = false;
+                this.tileUp('End of Swipe');
             }
         }
 
@@ -434,12 +437,10 @@ class BaseLevel extends BaseState {
         }
 
     }
-    
-    endSubState(whoCalledMe)
-    {
+
+    endSubState(whoCalledMe) {
         game.EventsWaitingCounter--;
-        if(game.EventsWaitingCounter > 0)
-        {
+        if (game.EventsWaitingCounter > 0) {
             game.subState = "subStateEnded";
             console.log("State ended: " + whoCalledMe);
         }
@@ -501,7 +502,7 @@ class BaseLevel extends BaseState {
                 game.EventsWaitingCounter++;
                 tween.onComplete.add(
                     () => {
-                        game.afterSwap_WE = true;
+                        game.afterSwap = true;
                         this.endSubState('swapTiles');
                     }
                 )
@@ -537,18 +538,15 @@ class BaseLevel extends BaseState {
         else {
 
             //it means: no mmore matches is going to be found, close this swipe.
-            if (game.subState == 'firstCheck')
-            {
+            if (game.subState == 'firstCheck') {
                 game.subState = 'noMatchesAtAll';
                 this.swapTiles('noMatchesAtAll');
             }
-            else if (game.subState ='checkAfterDrop')
-            {
+            else if (game.subState = 'checkAfterDrop') {
                 game.regenerate = true;
                 this.endSubState()
             }
-            else if (game.subState == 'checkAfterRegenerate')
-            {
+            else if (game.subState == 'checkAfterRegenerate') {
                 game.noAnyOtherMatch = true;
                 this.endSubState()
             }
@@ -749,11 +747,8 @@ class BaseLevel extends BaseState {
                 }
             }
         }
-        TBD;
-        if (!this.checkMatch('setupTiles')) {
-                this.tileUp();
-            }
-        END TBD
+        game.endSetup = true;
+        this.endSubState();
     }
 
     addTile(i, j, type = 0) {
@@ -784,8 +779,7 @@ class BaseLevel extends BaseState {
         game.tileGrid[i][j] = tile;
 
 
-        if(game.subState == 'hasBonus' || game.subState == 'deleteTile' || game.subState == 'setupTileCreation')
-        {
+        if (game.subState == 'hasBonus' || game.subState == 'deleteTile' || game.subState == 'setupTileCreation') {
             tile.y = j * this.tileHeight + (this.tileHeight / 2);
             game.addTileFinished = true;
             this.endSubState();
@@ -1000,8 +994,7 @@ class BaseLevel extends BaseState {
 
     deleteClick() {
 
-        if(game.subState !="waitInput")
-        {
+        if (game.subState != "waitInput") {
             return;
         }
 
@@ -1031,8 +1024,7 @@ class BaseLevel extends BaseState {
 
     switchClick() {
 
-        if(game.subState !="waitInput")
-        {
+        if (game.subState != "waitInput") {
             return;
         }
 
@@ -1100,12 +1092,10 @@ class BaseLevel extends BaseState {
             action: 'saveGameState',
             data: JSON.stringify(savedData)
         }).then((resp) => {
-            if(resp.success)
-            {
+            if (resp.success) {
                 console.log("\n\n Game saved \n\n");
             }
-            else
-            {
+            else {
                 console.log("\n\n Game saving failure \n\n");
 
             }
