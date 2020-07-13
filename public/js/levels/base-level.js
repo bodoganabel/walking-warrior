@@ -553,6 +553,11 @@ class BaseLevel extends BaseState {
 
         if (gotMatches) {
 
+            //if player accidentally force switches matching tiles... 
+            if (game.switchOn) {
+                this.switchClick(true);
+            }
+
             console.log("check got matches")
             this.decrementMoves();
             game.subState = 'remove'
@@ -1065,15 +1070,9 @@ class BaseLevel extends BaseState {
                 me.switch.scale.setTo(0.32, 0.32);
             }
         }
-        else
-        {
+        else {
             return;
         }
-    }
-
-    switchTiles() {
-        this.switchClick();
-        this.tileUp();
     }
 
     deleteRow(tile) {
@@ -1081,7 +1080,7 @@ class BaseLevel extends BaseState {
 
         for (let i = 0; i < this.gridSize.w; i++) {
             this.removeTile(game.tileGrid[i][pos.y]);
-            console.log("Removed tile from row: "+ game.tileGrid[i][pos.y] + "; x: "+ game.tileGrid[i] + "; y: " + [pos.y])
+            console.log("Removed tile from row: " + game.tileGrid[i][pos.y] + "; x: " + game.tileGrid[i] + "; y: " + [pos.y])
         }
         this.decrementMoves(2);
         this.incrementScore(6);
