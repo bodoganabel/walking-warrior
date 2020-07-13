@@ -139,8 +139,9 @@ class ShapeMatcher {
     }
 
     static isMatchingTiles(tile1, tile2) {
-        //tiles that are already in a match cannot go in another match + tile with type of 15 (block cell) cannot be matched just moved
-        if (!tile1 || !tile2 || tile1.inMatch || tile2.inMatch || tile1.tileType == 15 || tile2.tileType == 15) {
+        //tiles that are already in a match cannot go in another match + tile with type of 15 (block cell) cannot be matched just moved.
+        //Also -1 is equal to null, so we also don't count that 
+        if (!tile1 || !tile2 || tile1.inMatch || tile2.inMatch || tile1.tileType == 15 || tile2.tileType == 15 || tile1.tileType == '-1' || tile2.tileType == '-1') {
             return false;
         }
 
