@@ -1,8 +1,33 @@
 class BaseLevel extends BaseState {
     constructor(game) {
         super(game);
+        this.scoreToFinish = 1111; //If you see this number in game, then actual level doesn't modyfied this value, and that is a bug
+    }
+
+    showDebugTile() {
+        console.log(" ")
+        console.log("tileGrid:")
+
+        for (let j = 0; j < this.gridSize.h; ++j) {
+            let line = "";
+            for (let i = 0; i < this.gridSize.w; ++i) {
+                line += game.tileGrid[i][j].tileType.toString() + " ";
+            }
+            console.log(line)
+        }
+        console.log(" ")
+    }
+
+
+    //END Abel bugfix
+
+
+    //Very first function when changing scene
+    init(savedData) {
+        console.log("init");
+
         this.tileOffset = 200;
-        this.tileHeight = this.tileWidth = 200;
+        game.tileHeight = this.tileWidth = 200;
 
 
         //regex: game.tileGrid.*=
@@ -10,7 +35,7 @@ class BaseLevel extends BaseState {
         //game.TileGrid
 
         //console.log(game.tileGrid[1]);
-        this.tiles = [];
+        game.tiles = [];
 
         this.tileTypes = LVL.tileTypes;
 
@@ -25,9 +50,8 @@ class BaseLevel extends BaseState {
 
         //from globals
         this.dedicatedTileTypes = null;
-        this.scoreToFinish = null;
 
-        this.tileState = null;
+        game.tilestate = null;
 
         /*
             Abel's bugfix
@@ -83,31 +107,6 @@ class BaseLevel extends BaseState {
             }, false);
 
         }
-
-    }
-
-    showDebugTile() {
-        console.log(" ")
-        console.log("tileGrid:")
-
-        for (let j = 0; j < this.gridSize.h; ++j) {
-            let line = "";
-            for (let i = 0; i < this.gridSize.w; ++i) {
-                line += game.tileGrid[i][j].tileType.toString() + " ";
-            }
-            console.log(line)
-        }
-        console.log(" ")
-    }
-
-
-    //END Abel bugfix
-
-
-    //Very first function when changing scene
-    init(savedData) {
-        console.log("init");
-
         //These globals must reset on every new level.
 
         game.counter = new ScoreCounter();
@@ -128,13 +127,13 @@ class BaseLevel extends BaseState {
 
         //ha van savedData a mentésből, akkor abból initelünk
         if (typeof savedData == 'undefined') {
-            this.tileState = null;
+            game.tilestate = null;
             game.moves = LVL[level].moves;
             game.score = 0;
             game.unlockNextLevelIfGetToken = 0;
             console.log("type of saved data is undefined")
         } else {
-            this.tileState = savedData.tileState;
+            game.tilestate = savedData.tileState;
             game.moves = savedData.moves;
             game.score = savedData.score;
             this.tile1Count == savedData.tile1Count;
@@ -184,8 +183,6 @@ class BaseLevel extends BaseState {
             console.log("Don't have any savedata from server")
         }
 
-
-
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
         if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1)) {
 
@@ -227,6 +224,11 @@ class BaseLevel extends BaseState {
             this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
             return;
         }
+
+        // Everything is fine
+        {
+            this.setupTiles();
+        }
     };
 
 
@@ -265,11 +267,10 @@ class BaseLevel extends BaseState {
         if (LVL[this.getLevel()].hasDeleteButton) {
             this.createDelete();
         }
-
-        this.setupTiles();
     }
 
     isCompleted() {
+        console.log('Is completed is called. Score: '+ game.score+' ; Score to finish: ' + this.scoreToFinish)
         return game.score >= this.scoreToFinish;
     }
 
@@ -342,7 +343,7 @@ class BaseLevel extends BaseState {
         //Continue game
         else {
             game.checkedScore = true;
-            this.endSubState()
+            this.endSubState('checkScore: to continue game')
         }
     }
 
@@ -354,51 +355,71 @@ class BaseLevel extends BaseState {
             if (game.endSetup) {
                 game.endSetup = false;
                 game.subState='checkAfterDrop'
+                console.log("checkAfterInitialSpawn. Initial grid: ");
+                this.showDebugTile()
                 this.checkMatch('checkAfterInitialSpawn');
-
+                console.log("grid after first check:")
+                this.showDebugTile();
             }
 
             if (game.afterSwap) {
                 game.afterSwap = false;
                 game.subState = 'firstCheck';
+                console.log("firstCheck");
                 this.checkMatch('firstCheck');
             }
 
             //
-            if (game.addedBonusTile || game.noMoreBonus) {
+            if (game.addedBonusTile || game.removedMatches) {
                 game.addTileFinished = false;
-                game.noMoreBonus = false;
+                game.removedMatches = false;
                 //Call Drop event
                 game.subState = 'drop'
+                console.log("drop");
                 this.dropTiles();
+                console.log('After drop: ')
+                this.showDebugTile();
             }
 
             if (game.checkAfterDrop) {
                 game.checkAfterDrop = false;
                 game.subState = 'checkAfterDrop'
+                console.log("checkAfterDrop");
                 this.checkMatch('checkAfterDrop');
+                console.log('After check after drop: ')
+                this.showDebugTile();
             }
 
             if (game.regenerate) {
                 game.regenerate = false
                 game.subState = 'regenerate'
+                console.log("regenerate now");
                 this.regenerateTiles();
-            }
+                console.log('initialized regenerate (created new tiles which now falling down) on this grid: ')
+                this.showDebugTile()
+           }
 
             if (game.checkAfterRegenerate) {
                 game.checkAfterRegenerate = false;
+                
+                console.log("grid after finished regenerate: ")
+                this.showDebugTile();
+
                 game.subState = 'checkAfterRegenerate'
+                console.log("checkAfterRegenerate");
                 this.checkMatch('checkAfterRegenerate');
             }
 
             if (game.noAnyOtherMatch) {
                 game.noAnyOtherMatch = false;
                 game.subState = 'checkScore'
+                console.log("checkScore");
                 this.checkScore(); //call checkscore then release tile
             }
 
             if (game.checkedScore) {
                 game.checkedScore = false;
+                console.log("End of Swipe");
                 this.tileUp('End of Swipe');
             }
         }
@@ -414,7 +435,7 @@ class BaseLevel extends BaseState {
 
             let hoverPos = {
                 x: Math.floor(mousePos.x / this.tileWidth),
-                y: Math.floor(mousePos.y / this.tileHeight)
+                y: Math.floor(mousePos.y / game.tileHeight)
             };
 
             let diff = {
@@ -439,8 +460,10 @@ class BaseLevel extends BaseState {
     }
 
     endSubState(whoCalledMe) {
-        game.EventsWaitingCounter--;
-        if (game.EventsWaitingCounter > 0) {
+
+        if(game.EventsWaitingCounter>0)
+        {game.EventsWaitingCounter--}
+        if (game.EventsWaitingCounter == 0) {
             game.subState = "subStateEnded";
             console.log("State ended: " + whoCalledMe);
         }
@@ -457,20 +480,20 @@ class BaseLevel extends BaseState {
 
             let tile1Pos = {
                 x: (this.activeTile1.x - this.tileWidth / 2) / this.tileWidth,
-                y: (this.activeTile1.y - this.tileHeight / 2) / this.tileHeight
+                y: (this.activeTile1.y - game.tileHeight / 2) / game.tileHeight
             };
             let tile2Pos = {
                 x: (this.activeTile2.x - this.tileWidth / 2) / this.tileWidth,
-                y: (this.activeTile2.y - this.tileHeight / 2) / this.tileHeight
+                y: (this.activeTile2.y - game.tileHeight / 2) / game.tileHeight
             };
 
             var t1Index = {
                 x: ((this.activeTile1.x - this.tileOffset) - this.tileWidth / 2) / this.tileWidth,
-                y: (this.activeTile1.y - this.tileHeight / 2) / this.tileHeight
+                y: (this.activeTile1.y - game.tileHeight / 2) / game.tileHeight
             };
             var t2Index = {
                 x: ((this.activeTile2.x - this.tileOffset) - this.tileWidth / 2) / this.tileWidth,
-                y: (this.activeTile2.y - this.tileHeight / 2) / this.tileHeight
+                y: (this.activeTile2.y - game.tileHeight / 2) / game.tileHeight
             };
 
             //Swap them in our "theoretical" grid
@@ -487,12 +510,12 @@ class BaseLevel extends BaseState {
             tween = this.game.add.tween(this.activeTile1);
             tween.to({
                 x: tile2Pos.x * this.tileWidth + (this.tileWidth / 2),
-                y: tile2Pos.y * this.tileHeight + (this.tileHeight / 2)
+                y: tile2Pos.y * game.tileHeight + (game.tileHeight / 2)
             }, 200, Phaser.Easing.Linear.In, true);
             tween = this.game.add.tween(this.activeTile2);
             tween.to({
                 x: tile1Pos.x * this.tileWidth + (this.tileWidth / 2),
-                y: tile1Pos.y * this.tileHeight + (this.tileHeight / 2)
+                y: tile1Pos.y * game.tileHeight + (game.tileHeight / 2)
             }, 200, Phaser.Easing.Linear.In, true);
 
             this.activeTile1 = game.tileGrid[t1Index.x][t1Index.y];
@@ -525,30 +548,36 @@ class BaseLevel extends BaseState {
 
     checkMatch(whoCalledMe) {
 
+        console.log("checking by: "+ whoCalledMe);
+
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
         let gotMatches = (matchGroups.length > 0) ? true : false;
 
         if (gotMatches) {
 
+            console.log("check got matches")
             this.decrementMoves();
             game.subState = 'remove'
+            console.log('remove: ')
+            console.log(matchGroups)
             this.removeMatches(matchGroups);
-            //this.dropTiles();
         }
         else {
+
+            console.log("Check: no matches. Game state: "+ game.subState)
 
             //it means: no mmore matches is going to be found, close this swipe.
             if (game.subState == 'firstCheck') {
                 game.subState = 'noMatchesAtAll';
                 this.swapTiles('noMatchesAtAll');
             }
-            else if (game.subState = 'checkAfterDrop') {
+            else if (game.subState == 'checkAfterDrop') {
                 game.regenerate = true;
-                this.endSubState()
+                this.endSubState('checkMatch: after drop.')
             }
             else if (game.subState == 'checkAfterRegenerate') {
                 game.noAnyOtherMatch = true;
-                this.endSubState()
+                this.endSubState('checkMatch: after regenerate.')
             }
         }
     }
@@ -558,9 +587,14 @@ class BaseLevel extends BaseState {
 
         let events = this.game.time.events
         events.add(300, () => {
-            this.fillTiles();
+            for (let i = 0; i < this.gridSize.w; ++i) {
+                for (let j = 0; j < this.gridSize.h; ++j) {
+                    if (game.tileGrid[i][j].tileType == '-1') {
+                        this.addTile(i, j);
+                    }
+                }
+            }
         })
-        return true;
     }
 
     removeMatches(matchGroups) {
@@ -615,35 +649,17 @@ class BaseLevel extends BaseState {
                         //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
                         this.incrementScore();
                         this.incremenentMoves(2);
-                        return;
-                    } else {
-                        game.subState = 'noBonus';
-                        game.noMoreBonus = true;
-                        this.endSubState();
-                        return;
                     }
                 }
             }
         }
 
+        game.subState = 'removedMatches';
+        game.removedMatches = true;
+        this.endSubState('removeMatches: after removed matches.');
+
         //console.log("pos: remove tiles done. Grid:")
         this.showDebugTile();
-    }
-
-
-
-    fillTiles() {
-        //console.log("pos: fill tiles")
-
-        for (let i = 0; i < this.gridSize.w; ++i) {
-            for (let j = 0; j < this.gridSize.h; ++j) {
-                if (game.tileGrid[i][j].tileType == '-1') {
-                    game.subState = 'fillTiles'
-                    this.addTile(i, j);
-                }
-            }
-        }
-        //console.log("pos: after filled tiles")
     }
 
     dropTiles() {
@@ -662,7 +678,7 @@ class BaseLevel extends BaseState {
                         game.EventsWaitingCounter++;
                         this.game.time.events.add(200, () => {
                             game.checkAfterDrop = true;
-                            this.endSubState()
+                            this.endSubState('dropTiles')
                         })
                     }
                     else {
@@ -675,14 +691,14 @@ class BaseLevel extends BaseState {
                                 let tween;
                                 tween = this.game.add.tween(tempTile)
                                 tween.to({
-                                    y: this.tileHeight * j + (this.tileHeight / 2)
+                                    y: game.tileHeight * j + (game.tileHeight / 2)
                                 }, 200, Phaser.Easing.Linear.In, true)
 
                                 game.EventsWaitingCounter++;
                                 tween.onComplete.add(
                                     () => {
                                         game.checkAfterDrop = true;
-                                        this.endSubState();
+                                        this.endSubState('dropTiles');
                                     }
                                 )
 
@@ -712,10 +728,10 @@ class BaseLevel extends BaseState {
     removeTile(tile) {
 
         let pos = this.getTilePos(tile);
-        console.log("tile: pos:")
+        console.log("tile and pos:")
         console.log(tile)
         console.log(pos);
-        this.tiles.remove(tile);
+        game.tiles.remove(tile);
         game.tileGrid[pos.x][pos.y].tileType = '-1';
     }
 
@@ -730,25 +746,25 @@ class BaseLevel extends BaseState {
         }
 
         console.log("Tile States at 'setupTiles()': ");
-        console.log(this.tileState);
+        console.log(game.tilestate);
         this.showDebugTile();
 
-        this.tiles = this.game.add.group();
+        game.tiles = this.game.add.group();
         //console.log("tileState to load map from: ")
-        //console.log(this.tileState);
+        //console.log(game.tilestate);
         game.subState = 'setupTileCreation'
         for (let i = 0; i < this.gridSize.w; ++i) {
             for (let j = 0; j < this.gridSize.h; ++j) {
                 //ha van tileStateünk mentésből, akkor abból töltjük fel a gridet
-                if (this.tileState == null) {
+                if (game.tilestate == null) {
                     this.addTile(i, j);
                 } else {
-                    this.addTile(i, j, this.tileState[i][j]);
+                    this.addTile(i, j, game.tilestate[i][j]);
                 }
             }
         }
         game.endSetup = true;
-        this.endSubState();
+        this.endSubState('setupTiles');
     }
 
     addTile(i, j, type = 0) {
@@ -767,10 +783,10 @@ class BaseLevel extends BaseState {
             tileNumber = this.randomizeTile();
             ty = 0;
         } else {
-            ty = j * this.tileHeight + (this.tileHeight / 2);
+            ty = j * game.tileHeight + (game.tileHeight / 2);
         }
 
-        let tile = this.tiles.create(tx, ty, tileNumber.toString());
+        let tile = game.tiles.create(tx, ty, tileNumber.toString());
         tile.anchor.setTo(0.5, 0.5);
         tile.inputEnabled = true;
         tile.tileType = tileNumber;
@@ -779,24 +795,32 @@ class BaseLevel extends BaseState {
         game.tileGrid[i][j] = tile;
 
 
-        if (game.subState == 'hasBonus' || game.subState == 'deleteTile' || game.subState == 'setupTileCreation') {
-            tile.y = j * this.tileHeight + (this.tileHeight / 2);
+
+        
+
+        if (game.subState == 'deleteTile') {
+            console.log("added tile fast");
+            tile.y = j * game.tileHeight + (game.tileHeight / 2);
             game.addTileFinished = true;
-            this.endSubState();
+            this.endSubState('addedTileFast: after deleted simple Tile');
         }
-        else if (game.subState == 'fillTiles' && type == 0) {
+        else if (game.subState == "regenerate" && type == 0) {
             let tween = this.game.add.tween(tile);
             tween.to({
-                y: j * this.tileHeight + (this.tileHeight / 2)
+                y: j * game.tileHeight + (game.tileHeight / 2)
             }, 100, Phaser.Easing.Linear.In, true)
 
             game.EventsWaitingCounter++;
             tween.onComplete.add(
                 () => {
                     game.checkAfterRegenerate = true;
-                    this.endSubState();
+                    this.endSubState('added tile after regenerate');
                 }
             )
+        }
+        else if (game.subState == 'setupTileCreation' || game.subState == 'hasBonus') {
+            console.log("added tile fast");
+            tile.y = j * game.tileHeight + (game.tileHeight / 2);
         }
     }
 
@@ -865,7 +889,7 @@ class BaseLevel extends BaseState {
         //console.log()
 
         this.clickedPos.x = (tile.x - this.tileOffset - this.tileWidth / 2) / this.tileWidth;
-        this.clickedPos.y = (tile.y - this.tileHeight / 2) / this.tileHeight;
+        this.clickedPos.y = (tile.y - game.tileHeight / 2) / game.tileHeight;
 
         if (tile.tileType == 'potassium') {
             game.subState = 'deleteRowByPotassium'
@@ -961,7 +985,7 @@ class BaseLevel extends BaseState {
     getTilePos(tile) {
         return {
             x: (tile.x - this.tileOffset - this.tileWidth / 2) / this.tileWidth,
-            y: (tile.y - this.tileHeight / 2) / this.tileHeight
+            y: (tile.y - game.tileHeight / 2) / game.tileHeight
         }
     }
 
