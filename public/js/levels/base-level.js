@@ -184,7 +184,7 @@ class BaseLevel extends BaseState {
         }
 
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
-        if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1)) {
+        if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1) && actLevel > 3) {
 
             let hastoken = (data.tokens == 1) ? true : false;
             if (hastoken) {
@@ -219,7 +219,7 @@ class BaseLevel extends BaseState {
 
 
         }
-        else if (gameLevel < actLevel) {
+        else if (gameLevel < actLevel && actLevel > 3) {
             console.log(game.unlockNextLevelIfGetToken + "\n " + gameLevel + "\n " + actLevel)
             this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
             return;
@@ -569,7 +569,7 @@ class BaseLevel extends BaseState {
 
                 //if swap click enabled, do not swap back
                 if (game.switchOn) {
-                    this.decrementMoves(-3);
+                    this.decrementMoves(3);
                     this.switchClick(true);
                     game.noAnyOtherMatch = true;
                     this.endSubState('checkMatch: after regenerate.')
@@ -911,7 +911,7 @@ class BaseLevel extends BaseState {
         //tile törlése, -2 move
         if (this.deleteOn) {
             this.deleteClick();
-            this.decrementMoves(-2); // increase only for debug
+            this.decrementMoves(2);
             this.removeTile(tile);
             game.removedMatches = true;
             this.endSubState();
