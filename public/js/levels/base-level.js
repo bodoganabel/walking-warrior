@@ -46,7 +46,7 @@ class BaseLevel extends BaseState {
         this.activeTile1 = this.activeTile2 = null;
 
         //to init
-
+        game.switchOn = false //switch enabled;
 
         //from globals
         this.dedicatedTileTypes = null;
@@ -270,7 +270,7 @@ class BaseLevel extends BaseState {
     }
 
     isCompleted() {
-        console.log('Is completed is called. Score: '+ game.score+' ; Score to finish: ' + this.scoreToFinish)
+        console.log('Is completed is called. Score: ' + game.score + ' ; Score to finish: ' + this.scoreToFinish)
         return game.score >= this.scoreToFinish;
     }
 
@@ -354,7 +354,7 @@ class BaseLevel extends BaseState {
 
             if (game.endSetup) {
                 game.endSetup = false;
-                game.subState='checkAfterDrop'
+                game.subState = 'checkAfterRegenerate'
                 console.log("checkAfterInitialSpawn. Initial grid: ");
                 this.showDebugTile()
                 this.checkMatch('checkAfterInitialSpawn');
@@ -370,8 +370,7 @@ class BaseLevel extends BaseState {
             }
 
             //
-            if (game.addedBonusTile || game.removedMatches) {
-                game.addTileFinished = false;
+            if (game.removedMatches) {
                 game.removedMatches = false;
                 //Call Drop event
                 game.subState = 'drop'
@@ -397,11 +396,11 @@ class BaseLevel extends BaseState {
                 this.regenerateTiles();
                 console.log('initialized regenerate (created new tiles which now falling down) on this grid: ')
                 this.showDebugTile()
-           }
+            }
 
             if (game.checkAfterRegenerate) {
                 game.checkAfterRegenerate = false;
-                
+
                 console.log("grid after finished regenerate: ")
                 this.showDebugTile();
 
@@ -461,8 +460,7 @@ class BaseLevel extends BaseState {
 
     endSubState(whoCalledMe) {
 
-        if(game.EventsWaitingCounter>0)
-        {game.EventsWaitingCounter--}
+        if (game.EventsWaitingCounter > 0) { game.EventsWaitingCounter-- }
         if (game.EventsWaitingCounter == 0) {
             game.subState = "subStateEnded";
             console.log("State ended: " + whoCalledMe);
@@ -548,7 +546,7 @@ class BaseLevel extends BaseState {
 
     checkMatch(whoCalledMe) {
 
-        console.log("checking by: "+ whoCalledMe);
+        console.log("checking by: " + whoCalledMe);
 
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
         let gotMatches = (matchGroups.length > 0) ? true : false;
@@ -564,12 +562,23 @@ class BaseLevel extends BaseState {
         }
         else {
 
-            console.log("Check: no matches. Game state: "+ game.subState)
+            console.log("Check: no matches. Game state: " + game.subState)
 
             //it means: no mmore matches is going to be found, close this swipe.
             if (game.subState == 'firstCheck') {
-                game.subState = 'noMatchesAtAll';
-                this.swapTiles('noMatchesAtAll');
+
+                //if swap click enabled, do not swap back
+                if (game.switchOn) {
+                    this.decrementMoves(-3);
+                    this.switchClick(true);
+                    game.noAnyOtherMatch = true;
+                    this.endSubState('checkMatch: after regenerate.')
+                }
+                else {
+                    game.subState = 'noMatchesAtAll';
+                    this.swapTiles('noMatchesAtAll');
+                }
+
             }
             else if (game.subState == 'checkAfterDrop') {
                 game.regenerate = true;
@@ -669,7 +678,7 @@ class BaseLevel extends BaseState {
         for (let i = this.gridSize.w - 1; i >= 0; i--) {
             for (let j = this.gridSize.h - 1; j >= 0; --j) {
 
-                //Actual tile is zero
+                //Actual tile is empty
                 if (game.tileGrid[i][j].tileType == '-1') {
                     //console.log("found zero")
                     //ha a legtetején vagyunk az oszlopnak
@@ -794,17 +803,7 @@ class BaseLevel extends BaseState {
         tile.inMatch = false;
         game.tileGrid[i][j] = tile;
 
-
-
-        
-
-        if (game.subState == 'deleteTile') {
-            console.log("added tile fast");
-            tile.y = j * game.tileHeight + (game.tileHeight / 2);
-            game.addTileFinished = true;
-            this.endSubState('addedTileFast: after deleted simple Tile');
-        }
-        else if (game.subState == "regenerate" && type == 0) {
+        if (game.subState == "regenerate" && type == 0) {
             let tween = this.game.add.tween(tile);
             tween.to({
                 y: j * game.tileHeight + (game.tileHeight / 2)
@@ -892,21 +891,30 @@ class BaseLevel extends BaseState {
         this.clickedPos.y = (tile.y - game.tileHeight / 2) / game.tileHeight;
 
         if (tile.tileType == 'potassium') {
+            console.log("Potassium delete! (row)")
             game.subState = 'deleteRowByPotassium'
             this.deleteRow(tile);
+            game.removedMatches = true;
+            this.endSubState();
             return;
         }
 
         if (tile.tileType == 'magnesium') {
             game.subState = 'deleteColumnByMagnesium'
+            console.log("Magnesium delete! (column)")
             this.deleteCol(tile);
-            return;
+            game.removedMatches = true;
+            this.endSubState();
+            return
         }
 
         //tile törlése, -2 move
         if (this.deleteOn) {
-            this.deleteTile(tile);
             this.deleteClick();
+            this.decrementMoves(-2); // increase only for debug
+            this.removeTile(tile);
+            game.removedMatches = true;
+            this.endSubState();
             return;
         }
 
@@ -1034,39 +1042,37 @@ class BaseLevel extends BaseState {
         }
     }
 
-    deleteTile(tile) {
-        this.removeTile(tile);
-        game.subState = 'deleteTile'
-        this.addTile(this.getTilePos(tile).x, this.getTilePos(tile).y, 0);
-    }
-
     createSwitch() {
         let me = this;
         me.switch = me.game.add.button(10, 600, 'switch', this.switchClick, this, 2, 1, 0);
         me.switch.scale.setTo(0.32, 0.32);
     }
 
-    switchClick() {
+    switchClick(forceSwitch) {
 
-        if (game.subState != "waitInput") {
-            return;
+        if (game.subState == "waitInput" || forceSwitch) {
+
+
+
+            let me = this;
+            if (game.switchOn) {
+                game.switchOn = false;
+                me.switch = me.game.add.button(10, 600, 'switch', this.switchClick, this, 2, 1, 0);
+                me.switch.scale.setTo(0.32, 0.32);
+            } else {
+                game.switchOn = true;
+                me.switch = me.game.add.button(10, 600, 'switch-on', this.switchClick, this, 2, 1, 0);
+                me.switch.scale.setTo(0.32, 0.32);
+            }
         }
-
-        let me = this;
-        if (me.switchOn) {
-            me.switchOn = false;
-            me.switch = me.game.add.button(10, 600, 'switch', this.switchClick, this, 2, 1, 0);
-            me.switch.scale.setTo(0.32, 0.32);
-        } else {
-            me.switchOn = true;
-            me.switch = me.game.add.button(10, 600, 'switch-on', this.switchClick, this, 2, 1, 0);
-            me.switch.scale.setTo(0.32, 0.32);
+        else
+        {
+            return;
         }
     }
 
     switchTiles() {
         this.switchClick();
-        this.decrementMoves(3);
         this.tileUp();
     }
 
@@ -1074,7 +1080,8 @@ class BaseLevel extends BaseState {
         let pos = this.getTilePos(tile);
 
         for (let i = 0; i < this.gridSize.w; i++) {
-            this.deleteTile(game.tileGrid[i][pos.y]);
+            this.removeTile(game.tileGrid[i][pos.y]);
+            console.log("Removed tile from row: "+ game.tileGrid[i][pos.y] + "; x: "+ game.tileGrid[i] + "; y: " + [pos.y])
         }
         this.decrementMoves(2);
         this.incrementScore(6);
@@ -1085,7 +1092,7 @@ class BaseLevel extends BaseState {
         console.log(pos)
 
         for (let i = 0; i < this.gridSize.h; i++) {
-            this.deleteTile(game.tileGrid[pos.x][i]);
+            this.removeTile(game.tileGrid[pos.x][i]);
         }
         this.decrementMoves(2);
         this.incrementScore(9);
