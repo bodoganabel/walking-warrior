@@ -7,7 +7,7 @@ let WW = {
         type: Phaser.CANVAS,
         scene: [],
     },
-    gameVersion: 'v6.0',
+    gameVersion: 'v6.1',
     updateDate: 'Jul. 10., 2020',
     bugReportUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSeXguVIXKymvRkL_8kNKdFCKV_8kbb5VOpl_4re4dnuwtmtMw/viewform',
 }

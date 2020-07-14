@@ -26,6 +26,7 @@ class BaseLevel extends BaseState {
     init(savedData) {
         console.log("init");
 
+        game.userMadeFirstMove = false;
         this.tileOffset = 200;
         game.tileHeight = this.tileWidth = 200;
 
@@ -450,6 +451,11 @@ class BaseLevel extends BaseState {
 
             //megnézzük, hogy a user elhuzta-e az ujjat legalább egy tile szélességre vagy magasságra
             if ((Math.abs(diff.x) == 1 && diff.y == 0) || (Math.abs(diff.y) == 1 && diff.x == 0)) {
+
+                //If this is the user's first move, signal it with this flag
+                if (game.userMadeFirstMove == false) {
+                    game.userMadeFirstMove = true;
+                }
                 game.subState = 'swappingToCheck';
                 this.activeTile2 = game.tileGrid[hoverPos.x][hoverPos.y];
                 this.swapTiles();
@@ -969,18 +975,27 @@ class BaseLevel extends BaseState {
     }
 
     incrementScore(plus = 1) {
-        game.score += plus;
-        this.scoreLabel.text = "Score: " + game.score;
+        //Only give score if player started acting on level
+        if (game.userMadeFirstMove) {
+            game.score += plus;
+            this.scoreLabel.text = "Score: " + game.score;
+        }
     }
 
     decrementMoves(minus = 1) {
-        game.moves -= minus;
-        game.movesLabel.text = game.moves;
+        //Only give score if player started acting on level
+        if (game.userMadeFirstMove) {
+            game.moves -= minus;
+            game.movesLabel.text = game.moves;
+        }
     }
 
     incremenentMoves(plus = 1) {
-        game.moves += plus;
-        game.movesLabel.text = game.moves;
+        //Only give score if player started acting on level
+        if (game.userMadeFirstMove) {
+            game.moves += plus;
+            game.movesLabel.text = game.moves;
+        }
     }
 
 
