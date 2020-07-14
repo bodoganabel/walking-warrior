@@ -164,6 +164,8 @@ class BaseLevel extends BaseState {
         let gameLevel = parseInt(data.gamelevel);
         //actual level
         let actLevel = parseInt(this.getLevelNumber());
+        game.hastoken = (data.tokens == 1) ? true : false;
+        console.log("Got initial token's value: " + data.tokens)
 
         if (parseInt(data.tester) === 1) {
             return;
@@ -187,8 +189,8 @@ class BaseLevel extends BaseState {
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
         if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1) && actLevel > 3) {
 
-            let hastoken = (data.tokens == 1) ? true : false;
-            if (hastoken) {
+            game.hastoken = (data.tokens == 1) ? true : false;
+            if (game.hastoken) {
                 this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
                     (resp) => {
                         if (resp.success) {
@@ -291,13 +293,13 @@ class BaseLevel extends BaseState {
                 this.saveGameState();
                 if (nextLevel < 23) {
 
-                    let hastoken = false;
+                    game.hastoken = false;
                     this.ajaxPost('ajax.php', { action: 'getToken' }).then(
                         (resp) => {
                             if (resp.success) {
-                                hastoken = (resp.data == 1) ? true : false;
+                                game.hastoken = (resp.data == 1) ? true : false;
                                 console.log("Finished level. User token: ");
-                                console.log(hastoken);
+                                console.log(game.hastoken);
                                 console.log(resp.data);
                                 console.log(resp);
                                 // If level is 2 or below, no token needed to play next level.
@@ -306,7 +308,7 @@ class BaseLevel extends BaseState {
 
                                 }
                                 // Remove user's token if level > 3. If no token, send him walk.
-                                else if (hastoken) {
+                                else if (game.hastoken) {
                                     this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
                                         (resp) => {
                                             console.log("Server's response from removing tokens:")

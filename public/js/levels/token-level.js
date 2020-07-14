@@ -14,6 +14,9 @@ class TokenLevel extends BaseLevel {
         if (parseInt(data.tester) === 1) {
             return;
         }
+
+        this.tokensLabel.text = (game.hastoken)?'1':'0';
+
     }
 
     createUi() {
@@ -26,7 +29,6 @@ class TokenLevel extends BaseLevel {
             font: '100px Acme',
             fill: "#ff2800"
         });
-        this.tokensLabel.text = 1;
 
         super.createUi();
 
