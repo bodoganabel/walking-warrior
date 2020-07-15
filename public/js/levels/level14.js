@@ -31,7 +31,7 @@ class Level14 extends TokenLevel {
         const c1 = game.counter.get('1-match') + game.counter.get('7-match');
         const c2 = game.counter.get('4-match') + game.counter.get('10-match');
         const c3 = game.counter.get('5-match') + game.counter.get('11-match');
-        game.objectiveLabel.text = `Match        ${c1}/20           ${c2}/20          ${c3}/20`;
+        game.objectiveLabel.text = `Match${(c1>9)?"":"  "}        ${c1}/20${(c2>9)?"":"  "}        ${c2}/20${(c3>9)?"":"  "}        ${c3}/20`;
     }
 
     // removeMatches(matchGroups) {

@@ -972,7 +972,7 @@ class BaseLevel extends BaseState {
         }).text = this.getLevelNumber();
 
         //score
-        this.scoreLabel = this.game.add.text(920, 1780, "0", {
+        this.scoreLabel = this.game.add.text(950, 1780, "0", {
             font: '100px Acme',
             fill: '#ff2800'
         });
