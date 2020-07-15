@@ -634,33 +634,51 @@ class BaseLevel extends BaseState {
                 let bonusType = 0;
                 if (match[0].lShape == true) {
                     bonusType = 'magnesium';
-                    game.counter.increment('L-shape');
-                    this.incrementScore(15);
+                    if(game.userMadeFirstMove)
+                    {    
+                        game.counter.increment('L-shape');
+                        this.incrementScore(15);
+                    }
                 } else if (match[0].tShape == true) {
-                    bonusType = 'potassium';
-                    game.counter.increment('T-shape');
-                    this.incrementScore(15);
+                    bonusType = 'potassium';                    
+                    if(game.userMadeFirstMove)
+                    {    
+                        game.counter.increment('T-shape');
+                        this.incrementScore(15);
+                    }
                 } else if (match.length >= 4) {
                     if (this.isBonusTile(match[0])) {
                         bonusType = match[0].tileType;
                     } else if (this.isDefaultTile(match[0])) {
                         bonusType = match[0].tileType + 6;
                     }
-                    game.counter.increment('bonus-count');
+                    if(game.userMadeFirstMove)
+                    {    
+                        game.counter.increment('bonus-count');
+                        //create a bonus cell - 5 point
+                        this.incrementScore(5);
+                    }
 
-                    //create a bonus cell - 5 point
-                    this.incrementScore(5);
                 } else {
-                    //3-cell match - 1 point
-                    this.incrementScore();
+                    if(game.userMadeFirstMove)
+                    {    
+                        //3-cell match - 1 point
+                        this.incrementScore();
+                    }
                 }
 
 
                 if (match.length >= 5 && !match[0].tShape && !match[0].lShape) {
-                    game.counter.increment('5-in-a-row');
+                    if(game.userMadeFirstMove)
+                    {    
+                        game.counter.increment('5-in-a-row');
+                    }
                 }
 
-                game.counter.increment(match[0].tileType + '-match', match.length);
+                if(game.userMadeFirstMove)
+                {    
+                    game.counter.increment(match[0].tileType + '-match', match.length);
+                }
 
                 let hasBonusTile = false;
                 for (let i = 0; i < match.length; i++) {
@@ -675,9 +693,12 @@ class BaseLevel extends BaseState {
                     if (i == 3) {
                         game.subState = 'hasBonus'
                         this.addTile(pos.x, pos.y, bonusType);
-                        //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
-                        this.incrementScore();
-                        this.incrementMoves(2);
+                        if(game.userMadeFirstMove)
+                        {
+                            //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
+                            this.incrementScore();
+                            this.incrementMoves(2);
+                        }
                     }
                 }
             }
