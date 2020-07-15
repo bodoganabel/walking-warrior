@@ -289,12 +289,16 @@ class BaseLevel extends BaseState {
                 return;
             }
 
+            if(game.nexLevel == 24){
+                this.game.state.start('Menu', true, false)
+            }
+
             this.game.time.events.add(400, () => {
 
                 console.log("Executing next level validation process...\n\n")
                 game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
                 this.saveGameState();
-                if (game.nexLevel < 23) {
+                if (game.nexLevel < 24) {
 
                     game.hastoken = false;
                     this.ajaxPost('ajax.php', { action: 'getToken' }).then(
@@ -605,16 +609,19 @@ class BaseLevel extends BaseState {
                     this.endSubState('checkMatch: after regenerate.')
                 }
                 else {
+                    this.checkNeighbouringBonusTiles()
                     game.subState = 'noMatchesAtAll';
                     this.swapTiles('noMatchesAtAll');
                 }
 
             }
             else if (game.subState == 'checkAfterDrop') {
+                this.checkNeighbouringBonusTiles()
                 game.regenerate = true;
                 this.endSubState('checkMatch: after drop.')
             }
             else if (game.subState == 'checkAfterRegenerate') {
+                this.checkNeighbouringBonusTiles()
                 game.noAnyOtherMatch = true;
                 this.endSubState('checkMatch: after regenerate.')
             }
@@ -1045,6 +1052,63 @@ class BaseLevel extends BaseState {
 
     isBonusTile(tile) {
         return tile.tileType >= 7 && tile.tileType <= 12;
+    }
+    
+
+    checkNeighbouringBonusTiles() {
+        console.log("checking bonus tiles")
+        for (let i = 0; i < this.gridSize.w - 1; ++i) {
+            for (let j = 0; j < this.gridSize.h - 1; ++j) {
+                if (this.hasNeighbouringBonusTile(game.tileGrid[i][j])) {
+                    game.counter.increment('neighbouring-bonus-count');
+                    return;
+                }
+            }
+        }
+
+    }
+
+    hasNeighbouringBonusTile(tile) {
+
+        let pos = this.getTilePos(tile);
+
+        let rightNeighbour = null, bottomNeighbour = null,  topNeighbour = null, leftNeighbour = null;
+
+        try {
+            rightNeighbour = game.tileGrid[pos.x + 1][pos.y];            
+        } catch (error) {
+            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+        }
+
+        try {
+            bottomNeighbour = game.tileGrid[pos.x][pos.y + 1];
+        } catch (error) {
+            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+        }
+
+        try {
+            topNeighbour = game.tileGrid[pos.x][pos.y-1];            
+        } catch (error) {
+            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+        }
+
+        try {
+            leftNeighbour = game.tileGrid[pos.x-1][pos.y];            
+        } catch (error) {
+            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+        }        
+
+        let c1 = this.isBonusTile(tile);
+        let c2 = rightNeighbour && this.isBonusTile(rightNeighbour);
+        let c3 = bottomNeighbour && this.isBonusTile(bottomNeighbour);
+        let c4 = topNeighbour && this.isBonusTile(topNeighbour);
+        let c5 = leftNeighbour && this.isBonusTile(leftNeighbour);
+
+
+        console.log(`checking bonus tiles: ${c1} ${c2} ${c3} ${c4} ${c5}`)
+        let hasNeighbour = c1 && (c2 || c3 || c4 || c5)
+        console.log("checking bonus tiles: "+hasNeighbour)
+        return hasNeighbour;
     }
 
     //Release all tiles, waiting for new user input.
