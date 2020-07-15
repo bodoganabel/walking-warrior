@@ -587,8 +587,18 @@ class BaseLevel extends BaseState {
             //it means: no mmore matches is going to be found, close this swipe.
             if (game.subState == 'firstCheck') {
 
+
+                //if God Mode enabled, let user swap tiles where he wants
+                if (game.GODMODE)
+                {
+                    console.log("GOD MODE IS ENABLED")
+                    game.moves = 500;
+                    game.noAnyOtherMatch = true;
+                    this.endSubState('checkMatch: after regenerate.')
+                }
+
                 //if swap click enabled, do not swap back
-                if (game.switchOn) {
+                else if (game.switchOn) {
                     this.decrementMoves(3);
                     this.switchClick(true);
                     game.noAnyOtherMatch = true;
