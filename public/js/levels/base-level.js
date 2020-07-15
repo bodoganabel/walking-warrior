@@ -167,12 +167,12 @@ class BaseLevel extends BaseState {
         game.hastoken = (data.tokens == 1) ? true : false;
         console.log("Got initial token's value: " + data.tokens)
 
-        if (parseInt(data.tester) === 1) {
-            return;
-        }
+        /*         if (parseInt(data.tester) === 1) {
+                    return;
+                } */
 
 
-        //Getting saved "UnlockedNext" value.error
+        //Getting saved "UnlockedNext" value
 
         try {
             let saveData = JSON.parse(data.last_saved_state);
@@ -187,7 +187,7 @@ class BaseLevel extends BaseState {
         }
 
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
-        if (game.unlockNextLevelIfGetToken == 1 && gameLevel == (actLevel - 1) && actLevel > 3) {
+        if (game.unlockNextLevelIfGetToken == 1 && (gameLevel == (actLevel - 1) || ((actLevel == 4) && (gameLevel < 4))) && actLevel > 3) {
 
             game.hastoken = (data.tokens == 1) ? true : false;
             if (game.hastoken) {
@@ -197,9 +197,12 @@ class BaseLevel extends BaseState {
                             this.ajaxPost('ajax.php', { action: 'updateLevel', level: actLevel }).then(
                                 (resp) => {
                                     if (resp.success) {
+                                        game.hastoken = 0;
                                         game.unlockNextLevelIfGetToken = 0;
                                         this.saveGameState();
                                         console.log("Should have started")
+                                        //Display token count: 0
+                                        this.tokensLabel.text = '0';
                                         return;
                                         //Continue game;
                                     }
