@@ -161,7 +161,7 @@ class BaseLevel extends BaseState {
 
     beforeLevel(data) {
         console.log("before level");
-        let gameLevel = parseInt(data.gamelevel);
+        game.gameLevel = parseInt(data.gamelevel);
         //actual level
         let actLevel = parseInt(this.getLevelNumber());
         game.hastoken = (data.tokens == 1) ? true : false;
@@ -187,7 +187,7 @@ class BaseLevel extends BaseState {
         }
 
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
-        if (game.unlockNextLevelIfGetToken == 1 && (gameLevel == (actLevel - 1) || ((actLevel == 4) && (gameLevel < 4))) && actLevel > 3) {
+        if (game.unlockNextLevelIfGetToken == 1 && (game.gameLevel == (actLevel - 1) || ((actLevel == 4) && (game.gameLevel < 4))) && actLevel > 3) {
 
             game.hastoken = (data.tokens == 1) ? true : false;
             if (game.hastoken) {
@@ -225,8 +225,8 @@ class BaseLevel extends BaseState {
 
 
         }
-        else if (gameLevel < actLevel && actLevel > 3) {
-            console.log(game.unlockNextLevelIfGetToken + "\n " + gameLevel + "\n " + actLevel)
+        else if (game.gameLevel < actLevel && actLevel > 3) {
+            console.log(game.unlockNextLevelIfGetToken + "\n " + game.gameLevel + "\n " + actLevel)
             this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
             return;
         }
@@ -292,9 +292,9 @@ class BaseLevel extends BaseState {
             this.game.time.events.add(400, () => {
 
                 console.log("Executing next level validation process...\n\n")
-                let nextLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
+                game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
                 this.saveGameState();
-                if (nextLevel < 23) {
+                if (game.nexLevel < 23) {
 
                     game.hastoken = false;
                     this.ajaxPost('ajax.php', { action: 'getToken' }).then(
@@ -305,9 +305,9 @@ class BaseLevel extends BaseState {
                                 console.log(game.hastoken);
                                 console.log(resp.data);
                                 console.log(resp);
-                                // If level is 2 or below, no token needed to play next level.
-                                if (nextLevel < 4) {
-                                    this.game.state.start('NextLevel', true, false, nextLevel)
+                                // If level is 2 or below OR you've already unlocked this level = no token needed to play next level.
+                                if (game.nexLevel < 4 || (game.nexLevel <= game.gameLevel)) {
+                                    this.game.state.start('NextLevel', true, false, game.nexLevel)
 
                                 }
                                 // Remove user's token if level > 3. If no token, send him walk.
@@ -317,7 +317,7 @@ class BaseLevel extends BaseState {
                                             console.log("Server's response from removing tokens:")
                                             console.log(resp);
                                             console.log("Should Starting new game")
-                                            this.game.state.start('NextLevel', true, false, nextLevel)
+                                            this.game.state.start('NextLevel', true, false, game.nexLevel)
                                         }
                                     );
 
