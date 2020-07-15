@@ -13,7 +13,7 @@ class Level22 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('5-in-a-row');
-        this.objectiveLabel.text = `Make 2 5-in-a-row ${c}/2`;
+        game.objectiveLabel.text = `Make 2 5-in-a-row ${c}/2`;
     }
 
     // removeMatches(matchGroups) {

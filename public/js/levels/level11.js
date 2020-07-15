@@ -20,7 +20,7 @@ class Level11 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('L-shape') + game.counter.get('T-shape');
-        this.objectiveLabel.text = `Make 5 L or T shapes. 5/${c}`;
+        game.objectiveLabel.text = `Make 5 L or T shapes. 5/${c}`;
     }
 
     // removeMatches(matchGroups) {

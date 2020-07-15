@@ -20,7 +20,7 @@ class Level9 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('4-match') + game.counter.get('10-match');
-        this.objectiveLabel.text = `Match               ${c}/30`;
+        game.objectiveLabel.text = `Match               ${c}/30`;
     }
 
 

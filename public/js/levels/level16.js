@@ -13,7 +13,7 @@ class Level16 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('bonus-count');
-        this.objectiveLabel.text = `Make 6 bonustiles ${c}/6`;
+        game.objectiveLabel.text = `Make 6 bonustiles ${c}/6`;
     }
 
     // removeMatches(matchGroups) {

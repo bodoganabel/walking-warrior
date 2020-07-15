@@ -13,7 +13,7 @@ class Level18 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('bonus-count');
-        this.objectiveLabel.text = `Make 3 bonustiles ${c}/3`;
+        game.objectiveLabel.text = `Make 3 bonustiles ${c}/3`;
     }
 
     // removeMatches(matchGroups) {

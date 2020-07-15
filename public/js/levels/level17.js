@@ -23,7 +23,7 @@ class Level17 extends TokenLevel {
     updateObjective() {
         const c1 = game.counter.get('bonus-count');
         const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
-        this.objectiveLabel.text = `${c1}/2 bonustiles, ${c2}/2 L or Ts`;
+        game.objectiveLabel.text = `${c1}/2 bonustiles, ${c2}/2 L or Ts`;
     }
 
     // removeMatches(matchGroups) {

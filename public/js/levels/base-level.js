@@ -348,6 +348,7 @@ class BaseLevel extends BaseState {
 
         //Continue game
         else {
+            this.updateObjective();
             game.checkedScore = true;
             this.endSubState('checkScore: to continue game')
         }
@@ -839,27 +840,6 @@ class BaseLevel extends BaseState {
         }
     }
 
-    checkNewMatchesAfterRegeneration(whoCallsMe) {
-
-        game.EventsWaitingCounter--;
-        if (game.EventsWaitingCounter > 0) {
-            return false;
-        }
-        //console.log("This counter (game.EventWaitingCounter) should always be 0. Now its value is: " + game.EventsWaitingCounter + "and called by: " + whoCallsMe)
-        //console.log("seems okay")
-
-        this.updateObjective();
-
-        //check again if there is match. If no more, finish up the player action aka. "the swipe".
-        game.EventsWaitingCounter++;
-        if (!this.checkMatch('checkNewMatchesAfterRegeneration')) {
-            //console.log("All regeneration finished.");
-            this.tileUp();
-        }
-    }
-
-
-
 
     randomizeTile() {
         let tileTypePool = this.tileTypes;
@@ -1005,14 +985,14 @@ class BaseLevel extends BaseState {
 
 
     createObjective() {
-        this.objectiveLabel = this.game.add.text(20, 1800, "", {
+        game.objectiveLabel = this.game.add.text(20, 1800, "", {
             font: "70px Acme",
             fill: "#ff2800"
         });
     }
 
     updateObjective() {
-        this.objectiveLabel.text = `Reach ${this.scoreToFinish} points!`;
+        game.objectiveLabel.text = `Reach ${this.scoreToFinish} points!`;
     }
 
     getTilePos(tile) {

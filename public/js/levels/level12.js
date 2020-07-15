@@ -6,6 +6,6 @@ class Level12 extends TokenLevel {
     }
 
     updateObjective() {
-        this.objectiveLabel.text = `Reach 500 points`;
+        game.objectiveLabel.text = `Reach 500 points`;
     }
 }

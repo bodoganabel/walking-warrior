@@ -6,6 +6,6 @@ class Level3 extends BaseLevel {
     }
 
     updateObjective() {
-        this.objectiveLabel.text = 'Reach 400 points';
+        game.objectiveLabel.text = 'Reach 400 points';
     }
 }

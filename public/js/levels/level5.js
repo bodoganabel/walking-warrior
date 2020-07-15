@@ -25,7 +25,7 @@ class Level5 extends TokenLevel {
     updateObjective() {
         const c1 = game.counter.get('5-match') + game.counter.get('11-match');
         const c2 = game.counter.get('6-match') + game.counter.get('12-match');
-        this.objectiveLabel.text = `Match                ${c1}/20                  ${c2}/20`;
+        game.objectiveLabel.text = `Match                ${c1}/20                  ${c2}/20`;
     }
 
     // removeMatches(matchGroups) {

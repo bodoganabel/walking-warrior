@@ -7,7 +7,7 @@ class Level23 extends TokenLevel {
     }
 
     updateObjective() {
-        this.objectiveLabel.text = 'Make 2 neighbouring bonustiles';
+        game.objectiveLabel.text = 'Make 2 neighbouring bonustiles';
     }
 
     isCompleted() {
