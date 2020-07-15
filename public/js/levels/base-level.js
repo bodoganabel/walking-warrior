@@ -674,7 +674,7 @@ class BaseLevel extends BaseState {
                         this.addTile(pos.x, pos.y, bonusType);
                         //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
                         this.incrementScore();
-                        this.incremenentMoves(2);
+                        this.incrementMoves(2);
                     }
                 }
             }
@@ -887,6 +887,7 @@ class BaseLevel extends BaseState {
         this.clickedPos.y = (tile.y - game.tileHeight / 2) / game.tileHeight;
 
         if (tile.tileType == 'potassium') {
+            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
             console.log("Potassium delete! (row)")
             game.subState = 'deleteRowByPotassium'
             this.deleteRow(tile);
@@ -896,6 +897,7 @@ class BaseLevel extends BaseState {
         }
 
         if (tile.tileType == 'magnesium') {
+            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
             game.subState = 'deleteColumnByMagnesium'
             console.log("Magnesium delete! (column)")
             this.deleteCol(tile);
@@ -906,6 +908,7 @@ class BaseLevel extends BaseState {
 
         //tile törlése, -2 move
         if (this.deleteOn) {
+            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
             this.deleteClick();
             this.decrementMoves(2);
             this.removeTile(tile);
@@ -975,7 +978,7 @@ class BaseLevel extends BaseState {
         }
     }
 
-    incremenentMoves(plus = 1) {
+    incrementMoves(plus = 1) {
         //Only give score if player started acting on level
         if (game.userMadeFirstMove) {
             game.moves += plus;
