@@ -570,8 +570,11 @@ class BaseLevel extends BaseState {
                 this.switchClick(true);
             }
 
+            if(game.subState == 'firstCheck')
+            {
+                this.decrementMoves();
+            }
             console.log("check got matches")
-            this.decrementMoves();
             game.subState = 'remove'
             console.log('remove: ')
             console.log(matchGroups)
