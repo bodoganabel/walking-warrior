@@ -1,5 +1,5 @@
 
-class Level22 extends BaseLevel {
+class Level3 extends BaseLevel {
     constructor(game) {
         super(game);
         this.scoreToFinish = 400;

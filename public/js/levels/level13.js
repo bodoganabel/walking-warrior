@@ -2,7 +2,7 @@
 class Level13 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 3;
+        this.scoreToFinish = 6;
         this.tile1Count = 0;
     }
 
@@ -13,7 +13,7 @@ class Level13 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('bonus-count');
-        game.objectiveLabel.text = `Make 3 bonustiles ${c}/3`;
+        game.objectiveLabel.text = `Make 6 bonustiles ${c}/6`;
     }
 
     // removeMatches(matchGroups) {

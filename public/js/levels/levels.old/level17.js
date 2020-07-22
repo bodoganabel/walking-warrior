@@ -1,62 +1,63 @@
 
-class Level8 extends TokenLevel {
+class Level17 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 20;
-        this.tile1Count = 0;
-        this.tile2Count = 0;
+        this.tile1Count = 0;  //bonus count
+        this.tile2Count = 0; //l or t count
+        this.scoreToFinish = 2;
     }
 
-    create() {
-        super.create();
+    // getMatches(col, row) {
+    //     let lortMatches = this.getLortMatches(col, row);
+    //     let matches = super.getMatches(col, row);
 
-        let matchIcon1 = this.game.add.button(250, 1800, '5', null, this, 2, 1, 0);
-        matchIcon1.scale.setTo(0.45, 0.45);
-        let matchIcon2 = this.game.add.button(580, 1800, '6', null, this, 2, 1, 0);
-        matchIcon2.scale.setTo(0.45, 0.45);
-    }
+    //     return matches.concat(lortMatches);
+    // }
 
     isCompleted() {
-        const c1 = game.counter.get('5-match') + game.counter.get('11-match');
-        const c2 = game.counter.get('6-match') + game.counter.get('12-match');
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
         return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c1 = game.counter.get('5-match') + game.counter.get('11-match');
-        const c2 = game.counter.get('6-match') + game.counter.get('12-match');
-        game.objectiveLabel.text = `Match       ${(c1>9)?"":"  "}       ${c1}/20         ${(c2>9)?"":"  "}       ${c2}/20`;
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
+        game.objectiveLabel.text = `${c1}/2 bonustiles, ${c2}/2 L or Ts`;
     }
 
     // removeMatches(matchGroups) {
     //     if (matchGroups.length < 1) return;
 
+    //     let lortTileCount = 0;
+
     //     for (let group of matchGroups) {
 
     //         for (let match of group) {
     //             let bonusType = 0;
-    //             if (match.length >= 4) {
+
+    //             if (match[0].lShape == true) {
+    //                 bonusType = 'magnesium';
+    //             } else if (match[0].tShape == true) {
+    //                 bonusType = 'potassium';
+    //             } else if (match.length >= 4) {
     //                 if (this.isBonusTile(match[0])) {
     //                     bonusType = match[0].tileType;
     //                 } else if (this.isDefaultTile(match[0])) {
     //                     bonusType = match[0].tileType + 6;
     //                 }
-
-    //                 this.incrementScore(5);
+    //                 this.tile1Count++;
+    //                 this.incrementScore(2);
     //             } else {
     //                 this.incrementScore();
     //             }
 
-    //             //fehér és vörös vérsejteket kell matchelni (de abba beleszemit azoknak a bonus tilejuk is)
-    //             if (match[0].tileType == 5 || match[0].tileType == 11) {
-    //                 this.tile1Count += match.length;
-    //             } else if(match[0].tileType == 6 || match[0].tileType == 12) {
-    //                 this.tile2Count += match.length;
-    //             }
-
-
     //             let hasBonusTile = false;
     //             for (let i = 0; i < match.length; i++) {
+    //                 if (match[i].tShape == true || match[i].lShape == true) {
+    //                     lortTileCount++;
+    //                 }
+
     //                 //nézzük, hogy van-e bonus tile a matchben, mert akkor +1 pont és +1 move
     //                 if (this.isBonusTile(match[i])) {
     //                     hasBonusTile = true;
@@ -65,7 +66,7 @@ class Level8 extends TokenLevel {
     //                 let pos = this.getTilePos(match[i]);
     //                 this.removeTile(match[i]);
     //                 let newTile = null;
-    //                 if (i == 0) {
+    //                 if (i == 3) {
     //                     newTile = this.addTile(pos.x, pos.y, bonusType);
     //                 } else {
     //                     newTile = this.addTile(pos.x, pos.y, 0);
@@ -80,6 +81,7 @@ class Level8 extends TokenLevel {
     //         }
     //     }
 
+    //     this.tile2Count += lortTileCount / 5;
     //     this.updateObjective();
 
     //     //miutan beraktuk az eltávolítottak helyere az uj tile-okat, megnézzük, hogy lett-e így új match

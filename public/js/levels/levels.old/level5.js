@@ -1,5 +1,5 @@
 
-class Level8 extends TokenLevel {
+class Level5 extends TokenLevel {
     constructor(game) {
         super(game);
         this.scoreToFinish = 20;

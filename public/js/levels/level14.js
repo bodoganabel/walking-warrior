@@ -1,70 +1,63 @@
 
-
 class Level14 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.tile1Count = 0;
-        this.tile2Count = 0;
-        this.tile3Count = 0;
-        this.scoreToFinish = 20;
+        this.tile1Count = 0;  //bonus count
+        this.tile2Count = 0; //l or t count
+        this.scoreToFinish = 2;
     }
 
-    create() {
-        super.create();
+    // getMatches(col, row) {
+    //     let lortMatches = this.getLortMatches(col, row);
+    //     let matches = super.getMatches(col, row);
 
-        let small1 = this.game.add.button(200, 1800, '1', null, this, 2, 1, 0);
-        small1.scale.setTo(0.45, 0.45);
-        let small2 = this.game.add.button(440, 1800, '4', null, this, 2, 1, 0);
-        small2.scale.setTo(0.45, 0.45);
-        let small3 = this.game.add.button(680, 1800, '5', null, this, 2, 1, 0);
-        small3.scale.setTo(0.45, 0.45);
-    }
+    //     return matches.concat(lortMatches);
+    // }
 
     isCompleted() {
-        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
-        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
-        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
-        return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish && c3 >= this.scoreToFinish;
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
+        return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
-        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
-        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
-        game.objectiveLabel.text = `Match${(c1>9)?"":"  "}        ${c1}/20${(c2>9)?"":"  "}        ${c2}/20${(c3>9)?"":"  "}        ${c3}/20`;
+        const c1 = game.counter.get('bonus-count');
+        const c2 = game.counter.get('L-shape') + game.counter.get('T-shape');
+        game.objectiveLabel.text = `${c1}/2 bonustiles, ${c2}/2 L or Ts`;
     }
 
     // removeMatches(matchGroups) {
     //     if (matchGroups.length < 1) return;
 
+    //     let lortTileCount = 0;
+
     //     for (let group of matchGroups) {
 
     //         for (let match of group) {
     //             let bonusType = 0;
-    //             if (match.length >= 4) {
+
+    //             if (match[0].lShape == true) {
+    //                 bonusType = 'magnesium';
+    //             } else if (match[0].tShape == true) {
+    //                 bonusType = 'potassium';
+    //             } else if (match.length >= 4) {
     //                 if (this.isBonusTile(match[0])) {
     //                     bonusType = match[0].tileType;
     //                 } else if (this.isDefaultTile(match[0])) {
     //                     bonusType = match[0].tileType + 6;
     //                 }
-
-    //                 this.incrementScore(5);
+    //                 this.tile1Count++;
+    //                 this.incrementScore(2);
     //             } else {
     //                 this.incrementScore();
     //             }
 
-    //             //ezeket a tile típusokat kell matchelni
-    //             if (match[0].tileType == 1 || match[0].tileType == 7) {
-    //                 this.tile1Count += match.length;
-    //             } else if(match[0].tileType == 4 || match[0].tileType == 10) {
-    //                 this.tile2Count += match.length;
-    //             } else if (match[0].tileType == 5 || match[0].tileType == 11) {
-    //                 this.tile3Count += match.length;
-    //             }
-
-
     //             let hasBonusTile = false;
     //             for (let i = 0; i < match.length; i++) {
+    //                 if (match[i].tShape == true || match[i].lShape == true) {
+    //                     lortTileCount++;
+    //                 }
+
     //                 //nézzük, hogy van-e bonus tile a matchben, mert akkor +1 pont és +1 move
     //                 if (this.isBonusTile(match[i])) {
     //                     hasBonusTile = true;
@@ -73,7 +66,7 @@ class Level14 extends TokenLevel {
     //                 let pos = this.getTilePos(match[i]);
     //                 this.removeTile(match[i]);
     //                 let newTile = null;
-    //                 if (i == 0) {
+    //                 if (i == 3) {
     //                     newTile = this.addTile(pos.x, pos.y, bonusType);
     //                 } else {
     //                     newTile = this.addTile(pos.x, pos.y, 0);
@@ -88,6 +81,7 @@ class Level14 extends TokenLevel {
     //         }
     //     }
 
+    //     this.tile2Count += lortTileCount / 5;
     //     this.updateObjective();
 
     //     //miutan beraktuk az eltávolítottak helyere az uj tile-okat, megnézzük, hogy lett-e így új match
@@ -96,5 +90,4 @@ class Level14 extends TokenLevel {
     //         me.checkMatch();
     //     });
     // }
-
 }

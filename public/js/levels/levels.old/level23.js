@@ -1,5 +1,5 @@
 
-class Level19 extends TokenLevel {
+class Level23 extends TokenLevel {
     constructor(game) {
         super(game);
         this.tile1Count = 0;

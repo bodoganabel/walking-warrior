@@ -1,31 +1,37 @@
 
-class Level8 extends TokenLevel {
+
+class Level14 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 20;
         this.tile1Count = 0;
         this.tile2Count = 0;
+        this.tile3Count = 0;
+        this.scoreToFinish = 20;
     }
 
     create() {
         super.create();
 
-        let matchIcon1 = this.game.add.button(250, 1800, '5', null, this, 2, 1, 0);
-        matchIcon1.scale.setTo(0.45, 0.45);
-        let matchIcon2 = this.game.add.button(580, 1800, '6', null, this, 2, 1, 0);
-        matchIcon2.scale.setTo(0.45, 0.45);
+        let small1 = this.game.add.button(200, 1800, '1', null, this, 2, 1, 0);
+        small1.scale.setTo(0.45, 0.45);
+        let small2 = this.game.add.button(440, 1800, '4', null, this, 2, 1, 0);
+        small2.scale.setTo(0.45, 0.45);
+        let small3 = this.game.add.button(680, 1800, '5', null, this, 2, 1, 0);
+        small3.scale.setTo(0.45, 0.45);
     }
 
     isCompleted() {
-        const c1 = game.counter.get('5-match') + game.counter.get('11-match');
-        const c2 = game.counter.get('6-match') + game.counter.get('12-match');
-        return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish;
+        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
+        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
+        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
+        return c1 >= this.scoreToFinish && c2 >= this.scoreToFinish && c3 >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c1 = game.counter.get('5-match') + game.counter.get('11-match');
-        const c2 = game.counter.get('6-match') + game.counter.get('12-match');
-        game.objectiveLabel.text = `Match       ${(c1>9)?"":"  "}       ${c1}/20         ${(c2>9)?"":"  "}       ${c2}/20`;
+        const c1 = game.counter.get('1-match') + game.counter.get('7-match');
+        const c2 = game.counter.get('4-match') + game.counter.get('10-match');
+        const c3 = game.counter.get('5-match') + game.counter.get('11-match');
+        game.objectiveLabel.text = `Match${(c1>9)?"":"  "}        ${c1}/20${(c2>9)?"":"  "}        ${c2}/20${(c3>9)?"":"  "}        ${c3}/20`;
     }
 
     // removeMatches(matchGroups) {
@@ -47,11 +53,13 @@ class Level8 extends TokenLevel {
     //                 this.incrementScore();
     //             }
 
-    //             //fehér és vörös vérsejteket kell matchelni (de abba beleszemit azoknak a bonus tilejuk is)
-    //             if (match[0].tileType == 5 || match[0].tileType == 11) {
+    //             //ezeket a tile típusokat kell matchelni
+    //             if (match[0].tileType == 1 || match[0].tileType == 7) {
     //                 this.tile1Count += match.length;
-    //             } else if(match[0].tileType == 6 || match[0].tileType == 12) {
+    //             } else if(match[0].tileType == 4 || match[0].tileType == 10) {
     //                 this.tile2Count += match.length;
+    //             } else if (match[0].tileType == 5 || match[0].tileType == 11) {
+    //                 this.tile3Count += match.length;
     //             }
 
 
@@ -88,4 +96,5 @@ class Level8 extends TokenLevel {
     //         me.checkMatch();
     //     });
     // }
+
 }

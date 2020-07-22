@@ -2,18 +2,18 @@
 class Level18 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 3;
-        this.tile1Count = 0;
+        this.tile1Count = 0; //five in a row count
+        this.scoreToFinish = 2;
     }
 
     isCompleted() {
-        const c = game.counter.get('bonus-count');
+        const c = game.counter.get('5-in-a-row');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = game.counter.get('bonus-count');
-        game.objectiveLabel.text = `Make 3 bonustiles ${c}/3`;
+        const c = game.counter.get('5-in-a-row');
+        game.objectiveLabel.text = `Make 2 5-in-a-row ${c}/2`;
     }
 
     // removeMatches(matchGroups) {
@@ -28,22 +28,18 @@ class Level18 extends TokenLevel {
     //                     bonusType = match[0].tileType;
     //                 } else if (this.isDefaultTile(match[0])) {
     //                     bonusType = match[0].tileType + 6;
-    //                     this.tile1Count++;
     //                 }
 
-    //                 this.incrementScore(5);
+    //                 this.incrementScore(2);
     //             } else {
     //                 this.incrementScore();
     //             }
 
+    //             if (match.length >= 5) {
+    //                 this.tile1Count++;
+    //             }
 
-    //             let hasBonusTile = false;
     //             for (let i = 0; i < match.length; i++) {
-    //                 //nézzük, hogy van-e bonus tile a matchben, mert akkor +1 pont és +1 move
-    //                 if (this.isBonusTile(match[i])) {
-    //                     hasBonusTile = true;
-    //                 }
-
     //                 let pos = this.getTilePos(match[i]);
     //                 this.removeTile(match[i]);
     //                 let newTile = null;
@@ -53,11 +49,6 @@ class Level18 extends TokenLevel {
     //                     newTile = this.addTile(pos.x, pos.y, 0);
     //                 }
     //                 game.tileGrid[pos.x][pos.y] = newTile;
-    //             }
-
-    //             if (hasBonusTile) {
-    //                 this.incrementScore();
-    //                 this.incremenentMoves(2);
     //             }
     //         }
     //     }
@@ -70,5 +61,4 @@ class Level18 extends TokenLevel {
     //         me.checkMatch();
     //     });
     // }
-
 }

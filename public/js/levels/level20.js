@@ -2,66 +2,61 @@
 class Level20 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 6;
+        this.scoreToFinish = 5;
         this.tile1Count = 0;
     }
 
+    // getMatches(col, row) {
+    //     let lortMatches = this.getLortMatches(col, row);
+    //     let matches = super.getMatches(col, row);
+
+    //     return matches.concat(lortMatches);
+    // }
+
     isCompleted() {
-        const c = game.counter.get('bonus-count');
+        const c = game.counter.get('L-shape') + game.counter.get('T-shape');
         return c >= this.scoreToFinish;
     }
 
     updateObjective() {
-        const c = game.counter.get('bonus-count');
-        game.objectiveLabel.text = `Make 6 bonustiles ${c}/6`;
+        const c = game.counter.get('L-shape') + game.counter.get('T-shape');
+        game.objectiveLabel.text = `Make 5 L or T shapes. 5/${c}`;
     }
 
     // removeMatches(matchGroups) {
     //     if (matchGroups.length < 1) return;
 
+    //     let lortTileCount = 0;
+
     //     for (let group of matchGroups) {
 
     //         for (let match of group) {
     //             let bonusType = 0;
-    //             if (match.length >= 4) {
-    //                 if (this.isBonusTile(match[0])) {
-    //                     bonusType = match[0].tileType;
-    //                 } else if (this.isDefaultTile(match[0])) {
-    //                     bonusType = match[0].tileType + 6;
-    //                     this.tile1Count++;
-    //                 }
-
-    //                 this.incrementScore(5);
-    //             } else {
-    //                 this.incrementScore();
+    //             if (match[0].lShape == true) {
+    //                 bonusType = 'magnesium';
+    //             } else if (match[0].tShape == true) {
+    //                 bonusType = 'potassium';
     //             }
 
-
-    //             let hasBonusTile = false;
     //             for (let i = 0; i < match.length; i++) {
-    //                 //nézzük, hogy van-e bonus tile a matchben, mert akkor +1 pont és +1 move
-    //                 if (this.isBonusTile(match[i])) {
-    //                     hasBonusTile = true;
+    //                 if (match[i].tShape == true || match[i].lShape == true) {
+    //                     lortTileCount++;
     //                 }
 
     //                 let pos = this.getTilePos(match[i]);
     //                 this.removeTile(match[i]);
     //                 let newTile = null;
-    //                 if (i == 0) {
+    //                 if (i == 3) {
     //                     newTile = this.addTile(pos.x, pos.y, bonusType);
     //                 } else {
     //                     newTile = this.addTile(pos.x, pos.y, 0);
     //                 }
     //                 game.tileGrid[pos.x][pos.y] = newTile;
     //             }
-
-    //             if (hasBonusTile) {
-    //                 this.incrementScore();
-    //                 this.incremenentMoves(2);
-    //             }
     //         }
     //     }
 
+    //     this.tile1Count += lortTileCount / 5;
     //     this.updateObjective();
 
     //     //miutan beraktuk az eltávolítottak helyere az uj tile-okat, megnézzük, hogy lett-e így új match
@@ -70,5 +65,4 @@ class Level20 extends TokenLevel {
     //         me.checkMatch();
     //     });
     // }
-
 }
