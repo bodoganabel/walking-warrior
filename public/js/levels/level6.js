@@ -1,6 +1,6 @@
 
 
-class Level6 extends TokenLevel {
+class Level6 extends TokenLevel { 
     constructor(game) {
         super(game);
         this.tile1Count = 0;
