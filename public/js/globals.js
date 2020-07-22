@@ -28,13 +28,13 @@ let LVL = {
     },
     Level3: { //13
         dedicatedTileTypes: [15],
-        moves: 30,
+        moves: 20,
         hasSwitchButton: true,
         hasDeleteButton: true
     },
     Level4: { //16
         dedicatedTileTypes: [15],
-        moves: 50,
+        moves: 30,
         hasSwitchButton: true,
         hasDeleteButton: true
     },
@@ -68,13 +68,13 @@ let LVL = {
     },
     Level12: { //4
         dedicatedTileTypes: [15],
-        moves: 40,
+        moves: 50,
         hasSwitchButton: true,
         hasDeleteButton: true
     },
     Level13: { //20
         dedicatedTileTypes: [15],
-        moves: 50,
+        moves: 40,
         hasDeleteButton: true,
         hasSwitchButton: true
     },
@@ -89,7 +89,9 @@ let LVL = {
         hasSwitchButton: true,
     },
     Level16: { //2
-        moves: 50
+        moves: 50,
+        hasDeleteButton: true,
+
     },
     Level17: { //7
         moves: 40,
@@ -105,7 +107,7 @@ let LVL = {
     },
     Level20: { //11
         dedicatedTileTypes: [15],
-        moves: 50,
+        moves: 30,
         hasSwitchButton: true,
         hasDeleteButton: true
     },

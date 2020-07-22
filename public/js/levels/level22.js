@@ -2,10 +2,10 @@
 class Level22 extends BaseLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 400;
+        this.scoreToFinish = 125;
     }
 
     updateObjective() {
-        game.objectiveLabel.text = 'Reach 400 points';
+        game.objectiveLabel.text = 'Reach 125 points';
     }
 }

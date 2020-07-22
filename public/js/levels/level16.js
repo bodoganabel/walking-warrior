@@ -3,7 +3,7 @@ class Level16 extends BaseLevel {
     constructor(game) {
         super(game);
         this.tile1Count = 0;
-        this.scoreToFinish = 3;
+        this.scoreToFinish = 2;
     }
 
     // getMatches(col, row) {
@@ -19,7 +19,7 @@ class Level16 extends BaseLevel {
 
     updateObjective() {
         const count = game.counter.get('L-shape') + game.counter.get('T-shape');
-        game.objectiveLabel.text = `Make 3 L or T shapes. ${count}/3`;
+        game.objectiveLabel.text = `Make 2 L or T shapes. ${count}/2`;
     }
 
     // removeMatches(matchGroups) {

@@ -2,7 +2,7 @@
 class Level20 extends TokenLevel {
     constructor(game) {
         super(game);
-        this.scoreToFinish = 5;
+        this.scoreToFinish = 3;
         this.tile1Count = 0;
     }
 
@@ -20,7 +20,7 @@ class Level20 extends TokenLevel {
 
     updateObjective() {
         const c = game.counter.get('L-shape') + game.counter.get('T-shape');
-        game.objectiveLabel.text = `Make 5 L or T shapes. 5/${c}`;
+        game.objectiveLabel.text = `Make 3 L or T shapes. 3/${c}`;
     }
 
     // removeMatches(matchGroups) {
