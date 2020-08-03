@@ -56,6 +56,30 @@ class Preload extends BaseState {
         this.game.load.spritesheet('22button', 'public/assets/22button.png');
         this.game.load.spritesheet('23button', 'public/assets/23button.png');
 
+        this.game.load.spritesheet('g1button', 'public/assets/g1button.png');
+        this.game.load.spritesheet('g2button', 'public/assets/g2button.png');
+        this.game.load.spritesheet('g3button', 'public/assets/g3button.png');
+        this.game.load.spritesheet('g4button', 'public/assets/g4button.png');
+        this.game.load.spritesheet('g5button', 'public/assets/g5button.png');
+        this.game.load.spritesheet('g6button', 'public/assets/g6button.png');
+        this.game.load.spritesheet('g7button', 'public/assets/g7button.png');
+        this.game.load.spritesheet('g8button', 'public/assets/g8button.png');
+        this.game.load.spritesheet('g9button', 'public/assets/g9button.png');
+        this.game.load.spritesheet('g10button', 'public/assets/g10button.png');
+        this.game.load.spritesheet('g11button', 'public/assets/g11button.png');
+        this.game.load.spritesheet('g12button', 'public/assets/g12button.png');
+        this.game.load.spritesheet('g13button', 'public/assets/g13button.png');
+        this.game.load.spritesheet('g14button', 'public/assets/g14button.png');
+        this.game.load.spritesheet('g15button', 'public/assets/g15button.png');
+        this.game.load.spritesheet('g16button', 'public/assets/g16button.png');
+        this.game.load.spritesheet('g17button', 'public/assets/g17button.png');
+        this.game.load.spritesheet('g18button', 'public/assets/g18button.png');
+        this.game.load.spritesheet('g19button', 'public/assets/g19button.png');
+        this.game.load.spritesheet('g20button', 'public/assets/g20button.png');
+        this.game.load.spritesheet('g21button', 'public/assets/g21button.png');
+        this.game.load.spritesheet('g22button', 'public/assets/g22button.png');
+        this.game.load.spritesheet('g23button', 'public/assets/g23button.png');
+
         this.game.load.image("background", "public/assets/background.jpg");
         this.game.load.spritesheet('playbutton', 'public/assets/startbutton.png');
         this.game.load.spritesheet('infobutton', 'public/assets/infobutton.png');

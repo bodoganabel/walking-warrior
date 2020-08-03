@@ -65,4 +65,13 @@ class Ajax {
 
         return $stmt->fetch()[0];
     }
+
+    public static function getCompletedLevelsData(){
+        $db = Database::connect();
+        $user_id = $_SESSION['user_id'];
+        $stmt = $db->prepare("SELECT gamelevel, last_saved_state FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+
+        return $stmt->fetch();
+    }
 }

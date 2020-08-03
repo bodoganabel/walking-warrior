@@ -5,17 +5,17 @@ class BaseLevel extends BaseState {
     }
 
     showDebugTile() {
-        console.log(" ")
-        console.log("tileGrid:")
+        //console.log(" ")
+        //console.log("tileGrid:")
 
         for (let j = 0; j < this.gridSize.h; ++j) {
             let line = "";
             for (let i = 0; i < this.gridSize.w; ++i) {
                 line += game.tileGrid[i][j].tileType.toString() + " ";
             }
-            console.log(line)
+            //console.log(line)
         }
-        console.log(" ")
+        //console.log(" ")
     }
 
 
@@ -24,7 +24,7 @@ class BaseLevel extends BaseState {
 
     //Very first function when changing scene
     init(savedData) {
-        console.log("init");
+        //console.log("init");
 
         game.userMadeFirstMove = false;
         this.tileOffset = 200;
@@ -132,7 +132,7 @@ class BaseLevel extends BaseState {
             game.moves = LVL[level].moves;
             game.score = 0;
             game.unlockNextLevelIfGetToken = 0;
-            console.log("type of saved data is undefined")
+            //console.log("type of saved data is undefined")
         } else {
             game.tilestate = savedData.tileState;
             game.moves = savedData.moves;
@@ -142,7 +142,7 @@ class BaseLevel extends BaseState {
             this.tile3Count == savedData.tile3Count;
             game.unlockNextLevelIfGetToken = savedData.unlockNextLevelIfGetToken;
             ; // Player gets this if cleared actual level, but can't play next level because he need to walk.
-            console.log("type of saved data is anything but undefined")
+            //console.log("type of saved data is anything but undefined")
 
         }
 
@@ -160,12 +160,12 @@ class BaseLevel extends BaseState {
     }
 
     beforeLevel(data) {
-        console.log("before level");
+        //console.log("before level");
         game.gameLevel = parseInt(data.gamelevel);
         //actual level
         let actLevel = parseInt(this.getLevelNumber());
         game.hastoken = (data.tokens == 1) ? true : false;
-        console.log("Got initial token's value: " + data.tokens)
+        //console.log("Got initial token's value: " + data.tokens)
 
         /*         if (parseInt(data.tester) === 1) {
                     return;
@@ -177,13 +177,13 @@ class BaseLevel extends BaseState {
         try {
             let saveData = JSON.parse(data.last_saved_state);
 
-            console.log("Got unlockNextLevelIfGetToken below: ")
+            //console.log("Got unlockNextLevelIfGetToken below: ")
             game.unlockNextLevelIfGetToken = saveData.unlockNextLevelIfGetToken;
-            console.log(saveData);
-            console.log(saveData.unlockNextLevelIfGetToken);
+            //console.log(saveData);
+            //console.log(saveData.unlockNextLevelIfGetToken);
         }
         catch (e) {
-            console.log("Don't have any savedata from server")
+            //console.log("Don't have any savedata from server")
         }
 
         //If player already unlocked this level, but accidentaly started over the previous one, he can still play this level if he went on a walk
@@ -200,7 +200,7 @@ class BaseLevel extends BaseState {
                                         game.hastoken = 0;
                                         game.unlockNextLevelIfGetToken = 0;
                                         this.saveGameState();
-                                        console.log("Should have started")
+                                        //console.log("Should have started")
                                         //Display token count: 0
                                         this.tokensLabel.text = '0';
                                         return;
@@ -226,8 +226,8 @@ class BaseLevel extends BaseState {
 
         }
         else if (game.gameLevel < actLevel && actLevel > 3) {
-            console.log(game.unlockNextLevelIfGetToken + "\n " + game.gameLevel + "\n " + actLevel)
-            this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Plays some more and come back!');
+            //console.log(game.unlockNextLevelIfGetToken + "\n " + game.gameLevel + "\n " + actLevel)
+            this.game.state.start('Error', true, false, 'Unfortunately, you have not reached this level yet. Complete all the lower levels before you can play this level!');
             return;
         }
 
@@ -244,7 +244,7 @@ class BaseLevel extends BaseState {
     }
 
     create() {
-        console.log("create");
+        //console.log("create");
 
         super.create();
 
@@ -276,7 +276,7 @@ class BaseLevel extends BaseState {
     }
 
     isCompleted() {
-        console.log('Is completed is called. Score: ' + game.score + ' ; Score to finish: ' + this.scoreToFinish)
+        //console.log('Is completed is called. Score: ' + game.score + ' ; Score to finish: ' + this.scoreToFinish)
         return game.score >= this.scoreToFinish;
     }
 
@@ -288,60 +288,67 @@ class BaseLevel extends BaseState {
                 this.game.state.start('Menu');
                 return;
             }
+            game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
 
             if(game.nexLevel == 24){
-                this.game.state.start('Menu', true, false)
-            }
-
-            this.game.time.events.add(400, () => {
-
-                console.log("Executing next level validation process...\n\n")
-                game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
+                console.log("HEY SHITHEAD")
+                game.unlockNextLevelIfGetToken = 1; // This signals that user's beaten level 23.
                 this.saveGameState();
-                if (game.nexLevel < 24) {
+                this.game.state.start('Error', true, false, 'Congratulations!\n You have beaten all levels!\n You can play again in any levels or you can try sandbox mode.');
+            }
+            else
+            {
 
-                    game.hastoken = false;
-                    this.ajaxPost('ajax.php', { action: 'getToken' }).then(
-                        (resp) => {
-                            if (resp.success) {
-                                game.hastoken = (resp.data == 1) ? true : false;
-                                console.log("Finished level. User token: ");
-                                console.log(game.hastoken);
-                                console.log(resp.data);
-                                console.log(resp);
-                                // If level is 2 or below OR you've already unlocked this level = no token needed to play next level.
-                                if (game.nexLevel < 4 || (game.nexLevel <= game.gameLevel)) {
-                                    this.game.state.start('NextLevel', true, false, game.nexLevel)
-
-                                }
-                                // Remove user's token if level > 3. If no token, send him walk.
-                                else if (game.hastoken) {
-                                    this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
-                                        (resp) => {
-                                            console.log("Server's response from removing tokens:")
-                                            console.log(resp);
-                                            console.log("Should Starting new game")
-                                            this.game.state.start('NextLevel', true, false, game.nexLevel)
-                                        }
-                                    );
-
+                this.game.time.events.add(10, () => {
+    
+                    //console.log("Executing next level validation process...\n\n")
+                    this.saveGameState();
+                    if (game.nexLevel < 24) {
+    
+                        game.hastoken = false;
+                        this.ajaxPost('ajax.php', { action: 'getToken' }).then(
+                            (resp) => {
+                                if (resp.success) {
+                                    game.hastoken = (resp.data == 1) ? true : false;
+                                    //console.log("Finished level. User token: ");
+                                    //console.log(game.hastoken);
+                                    //console.log(resp.data);
+                                    //console.log(resp);
+                                    // If level is 2 or below OR you've already unlocked this level = no token needed to play next level.
+                                    if (game.nexLevel < 4 || (game.nexLevel <= game.gameLevel)) {
+                                        this.game.state.start('NextLevel', true, false, game.nexLevel)
+    
+                                    }
+                                    // Remove user's token if level > 3. If no token, send him walk.
+                                    else if (game.hastoken) {
+                                        this.ajaxPost('ajax.php', { action: 'removeTokens' }).then(
+                                            (resp) => {
+                                                //console.log("Server's response from removing tokens:")
+                                                //console.log(resp);
+                                                //console.log("Should Starting new game")
+                                                this.game.state.start('NextLevel', true, false, game.nexLevel)
+                                            }
+                                        );
+    
+                                    }
+                                    else {
+                                        game.unlockNextLevelIfGetToken = 1;
+                                        this.saveGameState();
+                                        this.game.state.start('Error', true, false, 'Congratulations!\n You cleared all levels so far.\n In order to unlock the next level, please walk 20 steps with the Pedometer app and earn 1 token.');
+                                    }
                                 }
                                 else {
-                                    game.unlockNextLevelIfGetToken = 1;
-                                    this.saveGameState();
-                                    this.game.state.start('Error', true, false, 'Congratulations!\n You cleared all levels so far.\n In order to unlock the next level, please walk 20 steps with the Pedometer app and earn 1 token.');
+                                    alert("Cannot connect to server!")
                                 }
                             }
-                            else {
-                                alert("Cannot connect to server!")
-                            }
-                        }
-                    );
-                } else {
-                    this.game.state.start('Menu');
-                }
-            });
-            return;
+                        );
+                    } else {
+                        this.game.state.start('Menu');
+                    }
+                });
+                return;
+            }
+
         }
 
         //If lose
@@ -366,70 +373,80 @@ class BaseLevel extends BaseState {
             if (game.endSetup) {
                 game.endSetup = false;
                 game.subState = 'checkAfterRegenerate'
-                console.log("checkAfterInitialSpawn. Initial grid: ");
+                //console.log("checkAfterInitialSpawn. Initial grid: ");
                 this.showDebugTile()
                 this.checkMatch('checkAfterInitialSpawn');
-                console.log("grid after first check:")
+                //console.log("grid after first check:")
                 this.showDebugTile();
             }
 
             if (game.afterSwap) {
                 game.afterSwap = false;
                 game.subState = 'firstCheck';
-                console.log("firstCheck");
+                //console.log("firstCheck");
                 this.checkMatch('firstCheck');
             }
 
             //
             if (game.removedMatches) {
                 game.removedMatches = false;
+                let events = this.game.time.events;
+                events.add(250, () => {
+                    game.wait_afterRemovedMatches = true;
+                    this.endSubState("waitAfterRemovedMatches");
+                });
+            }
+
+            if(game.wait_afterRemovedMatches)
+            {
+                game.wait_afterRemovedMatches= false;
                 //Call Drop event
                 game.subState = 'drop'
-                console.log("drop");
+                //console.log("drop");
                 this.dropTiles();
-                console.log('After drop: ')
+                //console.log('After drop: ')
                 this.showDebugTile();
             }
 
             if (game.checkAfterDrop) {
                 game.checkAfterDrop = false;
                 game.subState = 'checkAfterDrop'
-                console.log("checkAfterDrop");
+                //console.log("checkAfterDrop");
                 this.checkMatch('checkAfterDrop');
-                console.log('After check after drop: ')
+                //console.log('After check after drop: ')
                 this.showDebugTile();
             }
 
             if (game.regenerate) {
                 game.regenerate = false
                 game.subState = 'regenerate'
-                console.log("regenerate now");
+                //console.log("regenerate now");
                 this.regenerateTiles();
-                console.log('initialized regenerate (created new tiles which now falling down) on this grid: ')
+                //console.log('initialized regenerate (created new tiles which now falling down) on this grid: ')
                 this.showDebugTile()
             }
 
             if (game.checkAfterRegenerate) {
                 game.checkAfterRegenerate = false;
 
-                console.log("grid after finished regenerate: ")
+                //console.log("grid after finished regenerate: ")
                 this.showDebugTile();
 
                 game.subState = 'checkAfterRegenerate'
-                console.log("checkAfterRegenerate");
+                //console.log("checkAfterRegenerate");
                 this.checkMatch('checkAfterRegenerate');
             }
 
             if (game.noAnyOtherMatch) {
                 game.noAnyOtherMatch = false;
                 game.subState = 'checkScore'
-                console.log("checkScore");
+                //console.log("checkScore");
                 this.checkScore(); //call checkscore then release tile
             }
 
             if (game.checkedScore) {
                 game.checkedScore = false;
-                console.log("End of Swipe");
+                //console.log("End of Swipe");
                 this.tileUp('End of Swipe');
             }
         }
@@ -479,7 +496,7 @@ class BaseLevel extends BaseState {
         if (game.EventsWaitingCounter > 0) { game.EventsWaitingCounter-- }
         if (game.EventsWaitingCounter == 0) {
             game.subState = "subStateEnded";
-            console.log("State ended: " + whoCalledMe);
+            //console.log("State ended: " + whoCalledMe);
         }
     }
 
@@ -555,14 +572,14 @@ class BaseLevel extends BaseState {
 
         }
         else {
-            console.log("ERROR no active tiles!");
+            //console.log("ERROR no active tiles!");
             //this.tileUp('after swap-> swap tiles');
         }
     }
 
     checkMatch(whoCalledMe) {
 
-        console.log("checking by: " + whoCalledMe);
+        //console.log("checking by: " + whoCalledMe);
 
         let matchGroups = ShapeMatcher.getMatches(game.tileGrid, this.gridSize.w, this.gridSize.h);
         let gotMatches = (matchGroups.length > 0) ? true : false;
@@ -578,15 +595,15 @@ class BaseLevel extends BaseState {
             {
                 this.decrementMoves();
             }
-            console.log("check got matches")
+            //console.log("check got matches")
             game.subState = 'remove'
-            console.log('remove: ')
-            console.log(matchGroups)
+            //console.log('remove: ')
+            //console.log(matchGroups)
             this.removeMatches(matchGroups);
         }
         else {
 
-            console.log("Check: no matches. Game state: " + game.subState)
+            //console.log("Check: no matches. Game state: " + game.subState)
 
             //it means: no mmore matches is going to be found, close this swipe.
             if (game.subState == 'firstCheck') {
@@ -595,7 +612,7 @@ class BaseLevel extends BaseState {
                 //if God Mode enabled, let user swap tiles where he wants
                 if (game.GODMODE)
                 {
-                    console.log("GOD MODE IS ENABLED")
+                    //console.log("GOD MODE IS ENABLED")
                     game.moves = 500;
                     game.noAnyOtherMatch = true;
                     this.endSubState('checkMatch: after regenerate.')
@@ -707,7 +724,7 @@ class BaseLevel extends BaseState {
 
                     let pos = this.getTilePos(match[i]);
                     this.removeTile(match[i]);
-                    if (i == 3) {
+                    if (i == 3 && (game.userMadeFirstMove)) {
                         game.subState = 'hasBonus'
                         this.addTile(pos.x, pos.y, bonusType);
                         if(game.userMadeFirstMove)
@@ -795,9 +812,9 @@ class BaseLevel extends BaseState {
     removeTile(tile) {
 
         let pos = this.getTilePos(tile);
-        console.log("tile and pos:")
-        console.log(tile)
-        console.log(pos);
+        //console.log("tile and pos:")
+        //console.log(tile)
+        //console.log(pos);
         game.tiles.remove(tile);
         game.tileGrid[pos.x][pos.y].tileType = '-1';
     }
@@ -812,8 +829,8 @@ class BaseLevel extends BaseState {
             }
         }
 
-        console.log("Tile States at 'setupTiles()': ");
-        console.log(game.tilestate);
+        //console.log("Tile States at 'setupTiles()': ");
+        //console.log(game.tilestate);
         this.showDebugTile();
 
         game.tiles = this.game.add.group();
@@ -876,7 +893,7 @@ class BaseLevel extends BaseState {
             )
         }
         else if (game.subState == 'setupTileCreation' || game.subState == 'hasBonus') {
-            console.log("added tile fast");
+            //console.log("added tile fast");
             tile.y = j * game.tileHeight + (game.tileHeight / 2);
         }
     }
@@ -900,7 +917,7 @@ class BaseLevel extends BaseState {
             return;
         }
         if (game.subState == 'gotInput') {
-            console.log("tile touch timed out");
+            //console.log("tile touch timed out");
             this.tileUp();
         }
     }
@@ -909,7 +926,7 @@ class BaseLevel extends BaseState {
 
         //Prevent user: free swap by double clicking  
         if (game.subState != 'waitInput') {
-            console.log("click blocked");
+            //console.log("click blocked");
             return;
         }
 
@@ -929,7 +946,7 @@ class BaseLevel extends BaseState {
 
         if (tile.tileType == 'potassium') {
             if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
-            console.log("Potassium delete! (row)")
+            //console.log("Potassium delete! (row)")
             game.subState = 'deleteRowByPotassium'
             this.deleteRow(tile);
             game.removedMatches = true;
@@ -940,7 +957,7 @@ class BaseLevel extends BaseState {
         if (tile.tileType == 'magnesium') {
             if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
             game.subState = 'deleteColumnByMagnesium'
-            console.log("Magnesium delete! (column)")
+            //console.log("Magnesium delete! (column)")
             this.deleteCol(tile);
             game.removedMatches = true;
             this.endSubState();
@@ -1056,7 +1073,7 @@ class BaseLevel extends BaseState {
     
 
     checkNeighbouringBonusTiles() {
-        console.log("checking bonus tiles")
+        //console.log("checking bonus tiles")
         for (let i = 0; i < this.gridSize.w - 1; ++i) {
             for (let j = 0; j < this.gridSize.h - 1; ++j) {
                 if (this.hasNeighbouringBonusTile(game.tileGrid[i][j])) {
@@ -1077,25 +1094,25 @@ class BaseLevel extends BaseState {
         try {
             rightNeighbour = game.tileGrid[pos.x + 1][pos.y];            
         } catch (error) {
-            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+            //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }
 
         try {
             bottomNeighbour = game.tileGrid[pos.x][pos.y + 1];
         } catch (error) {
-            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+            //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }
 
         try {
             topNeighbour = game.tileGrid[pos.x][pos.y-1];            
         } catch (error) {
-            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+            //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }
 
         try {
             leftNeighbour = game.tileGrid[pos.x-1][pos.y];            
         } catch (error) {
-            console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
+            //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }        
 
         let c1 = this.isBonusTile(tile);
@@ -1105,16 +1122,16 @@ class BaseLevel extends BaseState {
         let c5 = leftNeighbour && this.isBonusTile(leftNeighbour);
 
 
-        console.log(`checking bonus tiles: ${c1} ${c2} ${c3} ${c4} ${c5}`)
+        //console.log(`checking bonus tiles: ${c1} ${c2} ${c3} ${c4} ${c5}`)
         let hasNeighbour = c1 && (c2 || c3 || c4 || c5)
-        console.log("checking bonus tiles: "+hasNeighbour)
+        //console.log("checking bonus tiles: "+hasNeighbour)
         return hasNeighbour;
     }
 
     //Release all tiles, waiting for new user input.
     tileUp(whoCalledMe) {
         if (whoCalledMe) {
-            console.log("tileUp called by: " + whoCalledMe);
+            //console.log("tileUp called by: " + whoCalledMe);
         }
         game.subState = 'waitInput';
         this.activeTile1 = this.activeTile2 = null;
@@ -1181,7 +1198,7 @@ class BaseLevel extends BaseState {
 
         for (let i = 0; i < this.gridSize.w; i++) {
             this.removeTile(game.tileGrid[i][pos.y]);
-            console.log("Removed tile from row: " + game.tileGrid[i][pos.y] + "; x: " + game.tileGrid[i] + "; y: " + [pos.y])
+            //console.log("Removed tile from row: " + game.tileGrid[i][pos.y] + "; x: " + game.tileGrid[i] + "; y: " + [pos.y])
         }
         this.decrementMoves(2);
         this.incrementScore(6);
@@ -1189,7 +1206,7 @@ class BaseLevel extends BaseState {
 
     deleteCol(tile) {
         let pos = this.getTilePos(tile);
-        console.log(pos)
+        //console.log(pos)
 
         for (let i = 0; i < this.gridSize.h; i++) {
             this.removeTile(game.tileGrid[pos.x][i]);
@@ -1224,10 +1241,10 @@ class BaseLevel extends BaseState {
             data: JSON.stringify(savedData)
         }).then((resp) => {
             if (resp.success) {
-                console.log("\n\n Game saved \n\n");
+                //console.log("\n\n Game saved \n\n");
             }
             else {
-                console.log("\n\n Game saving failure \n\n");
+                //console.log("\n\n Game saving failure \n\n");
 
             }
         }
