@@ -38,7 +38,7 @@ class Levels extends BaseState {
                         let index = (j + i * 6) + 1
                         if (index < 24) {
                             if (index <= greenButtons) {
-                                bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `$g{index}button`, `Level${index}`)
+                                bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `g${index}button`, `Level${index}`)
                             } else {
                                 bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `${index}button`, `Level${index}`)
                             }

@@ -864,7 +864,14 @@ class BaseLevel extends BaseState {
         let ty = null;
 
         if (type == 0) { //random
-            tileNumber = this.randomizeTile();
+            if(game.userMadeFirstMove)
+            {
+                tileNumber = this.randomizeTile();
+            }
+            else
+            {
+                tileNumber = this.randomizeTileWithoutSpecs(); //Cannot give special tiles
+            }
             ty = 0;
         } else {
             ty = j * game.tileHeight + (game.tileHeight / 2);
@@ -906,6 +913,14 @@ class BaseLevel extends BaseState {
             tileTypePool = this.tileTypes.concat(this.dedicatedTileTypes);
 
         }
+        let rnd = Math.floor(Math.random() * tileTypePool.length);
+
+        return tileTypePool[rnd];
+    }
+
+    randomizeTileWithoutSpecs()
+    {
+        let tileTypePool = [1, 2, 3, 4, 5, 6];
         let rnd = Math.floor(Math.random() * tileTypePool.length);
 
         return tileTypePool[rnd];
