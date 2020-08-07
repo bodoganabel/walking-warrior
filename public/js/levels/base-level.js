@@ -167,9 +167,10 @@ class BaseLevel extends BaseState {
         game.hastoken = (data.tokens == 1) ? true : false;
         //console.log("Got initial token's value: " + data.tokens)
 
-        /*         if (parseInt(data.tester) === 1) {
-                    return;
-                } */
+        if (parseInt(data.tester) === 1) {
+            this.setupTiles();        
+            return;
+        }
 
 
         //Getting saved "UnlockedNext" value
@@ -291,10 +292,15 @@ class BaseLevel extends BaseState {
             game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
 
             if(game.nexLevel == 24){
-                console.log("HEY SHITHEAD")
-                game.unlockNextLevelIfGetToken = 1; // This signals that user's beaten level 23.
-                this.saveGameState();
-                this.game.state.start('Error', true, false, 'Congratulations!\n You have beaten all levels!\n You can play again in any levels or you can try sandbox mode.');
+                
+                this.ajaxPost('ajax.php', { action: 'userCompletedAllLevels' }).then(
+                    (resp) => {
+                        game.unlockNextLevelIfGetToken = 1; // This signals that user's beaten level 23.
+                
+                        this.saveGameState();
+                        this.game.state.start('Error', true, false, 'Congratulations!\n You have beaten all levels!\n You can play again in any levels or you can try sandbox mode.');
+                    }
+                );
             }
             else
             {
@@ -386,6 +392,8 @@ class BaseLevel extends BaseState {
                 //console.log("firstCheck");
                 this.checkMatch('firstCheck');
             }
+
+            
 
             //
             if (game.removedMatches) {

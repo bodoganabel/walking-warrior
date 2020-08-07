@@ -28,7 +28,7 @@ class Levels extends BaseState {
                 console.log("Server's response from getCompletedLevelsData:")
                 console.log(resp);
                 let greenButtons = resp.data.gamelevel - 1;
-                if (JSON.parse(resp.data.last_saved_state).unlockNextLevelIfGetToken == 1 && greenButtons == 22) {
+                if (resp.data.last_saved_state !="" && JSON.parse(resp.data.last_saved_state).unlockNextLevelIfGetToken == 1 && greenButtons == 22) {
                     greenButtons++;
                 }
                 console.log(greenButtons)

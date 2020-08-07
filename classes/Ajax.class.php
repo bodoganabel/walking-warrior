@@ -74,4 +74,13 @@ class Ajax {
 
         return $stmt->fetch();
     }
+
+    public static function userCompletedAllLevels(){
+        $db = Database::connect();
+        $user_id = $_SESSION['user_id'];
+        $stmt = $db->prepare("UPDATE users SET Won = 'Yes' WHERE id = ?");
+        $stmt->execute([$user_id]);
+
+        return $stmt->fetch();
+    }
 }
