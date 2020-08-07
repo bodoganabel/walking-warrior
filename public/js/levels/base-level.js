@@ -388,12 +388,20 @@ class BaseLevel extends BaseState {
 
             if (game.afterSwap) {
                 game.afterSwap = false;
+                let events = this.game.time.events;
+                events.add(250, () => {
+                    game.wait_afterSwap = true;
+                    this.endSubState("wait_afterSwap");
+                });
+            }
+
+            if(game.wait_afterSwap)
+            {
+                game.wait_afterSwap = false;
                 game.subState = 'firstCheck';
                 //console.log("firstCheck");
                 this.checkMatch('firstCheck');
             }
-
-            
 
             //
             if (game.removedMatches) {
