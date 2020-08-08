@@ -99,6 +99,11 @@ class Preload extends BaseState {
         this.game.load.spritesheet('nextbutton', 'public/assets/next.png')
         this.game.load.spritesheet('downloadbutton', 'public/assets/download.png')
         this.game.load.spritesheet('backbutton', 'public/assets/backbutton.png')
+        this.game.load.image('done', 'public/assets/done.png')
+
+        // Particle effect emitter matchEffect
+        this.game.load.image('matchEffect', 'public/assets/effects/matchEffect.png')
+
         console.log("running");
     }
 

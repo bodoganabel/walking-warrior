@@ -1,8 +1,12 @@
 class BaseLevel extends BaseState {
+    
+    
+    
     constructor(game) {
         super(game);
-        this.scoreToFinish = 1111; //If you see this number in game, then actual level doesn't modyfied this value, and that is a bug
+        this.scoreToFinish = 1111; //If you see this number in game, then actual level doesn't modyfied this value, and that is a bug    
     }
+
 
     showDebugTile() {
         //console.log(" ")
@@ -24,7 +28,13 @@ class BaseLevel extends BaseState {
 
     //Very first function when changing scene
     init(savedData) {
+
+
+
         //console.log("init");
+
+        
+
 
         game.userMadeFirstMove = false;
         this.tileOffset = 200;
@@ -103,6 +113,12 @@ class BaseLevel extends BaseState {
                     game.moves += 10
                     //console.log("game.moves increased to: " + game.moves)
                 }
+
+                if (keyName == 'p') {
+                    this.createMatchEffect(200,200);
+                    //console.log("game.moves increased to: " + game.moves)
+                }
+
 
 
             }, false);
@@ -407,7 +423,7 @@ class BaseLevel extends BaseState {
             if (game.removedMatches) {
                 game.removedMatches = false;
                 let events = this.game.time.events;
-                events.add(250, () => {
+                events.add(500, () => {
                     game.wait_afterRemovedMatches = true;
                     this.endSubState("waitAfterRemovedMatches");
                 });
@@ -426,11 +442,21 @@ class BaseLevel extends BaseState {
 
             if (game.checkAfterDrop) {
                 game.checkAfterDrop = false;
+                let events = this.game.time.events;
+                events.add(250, () => {
+                    game.wait_regenerate = true;
+                    this.endSubState("checkAfterDrop");
+                });
+            }
+
+            if(game.wait_regenerate)
+            {
+                game.wait_regenerate = false;
                 game.subState = 'checkAfterDrop'
                 //console.log("checkAfterDrop");
                 this.checkMatch('checkAfterDrop');
                 //console.log('After check after drop: ')
-                this.showDebugTile();
+                //this.showDebugTile();
             }
 
             if (game.regenerate) {
@@ -593,6 +619,24 @@ class BaseLevel extends BaseState {
         }
     }
 
+    createMatchEffect(x,y)
+    {
+        if(!game.userMadeFirstMove)
+        {
+            return;
+        }
+        if(game.em == null)
+        {
+            game.em = this.game.add.emitter(200, 200, 100);
+            game.em.makeParticles('matchEffect');
+        }
+        game.em.gravity = 0;
+        game.em.x = x;
+        game.em.y = y;
+        game.em.start(true,800,null, 10);
+        //emitter.destroy(true,true);
+    }
+
     checkMatch(whoCalledMe) {
 
         //console.log("checking by: " + whoCalledMe);
@@ -601,7 +645,16 @@ class BaseLevel extends BaseState {
         let gotMatches = (matchGroups.length > 0) ? true : false;
 
         if (gotMatches) {
+            //particle emitter matchEffect
+            for (let group of matchGroups) {
 
+                group[0].forEach(element => {
+                    this.createMatchEffect(element.position.x, element.position.y);
+                    console.log(element.position);
+                });
+                //this.createMatchEffect(group.position.x, group.position.y);
+
+            }
             //if player accidentally force switches matching tiles... 
             if (game.switchOn) {
                 this.switchClick(true);

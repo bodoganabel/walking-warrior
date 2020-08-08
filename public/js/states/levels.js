@@ -22,6 +22,8 @@ class Levels extends BaseState {
         //button grid for selecting level
         let topOffset = 320
         let leftOffset = 120
+        game.diyOffset = 290;
+        game.dixOffset = 130;
 
         this.ajaxPost('ajax.php', { action: 'getCompletedLevelsData' }).then(
             (resp) => {
@@ -38,10 +40,10 @@ class Levels extends BaseState {
                         let index = (j + i * 6) + 1
                         if (index < 24) {
                             if (index <= greenButtons) {
-                                bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `g${index}button`, `Level${index}`)
-                            } else {
-                                bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `${index}button`, `Level${index}`)
+                                game.add.sprite(i * 280 + game.dixOffset, j * 240 + game.diyOffset, 'done');
+                                console.log("HEEEE: " + (i * 280 + leftOffset) +";" +(j * 240 + topOffset));
                             }
+                            bBuilder.createLevelButton(i * 280 + leftOffset, j * 240 + topOffset, `${index}button`, `Level${index}`)
                         } else {
                             //24. button
                             bBuilder.createButton(i * 280 + leftOffset, j * 240 + topOffset, 'sandbox', function () {
