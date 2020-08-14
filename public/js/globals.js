@@ -7,8 +7,8 @@ let WW = {
         type: Phaser.CANVAS,
         scene: [],
     },
-    gameVersion: 'v6.4', //Levels switched based on request.
-    updateDate: 'Aug. 03., 2020',
+    gameVersion: 'v6.7', //Levels switched based on request.
+    updateDate: 'Aug. 14., 2020',
     bugReportUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSeXguVIXKymvRkL_8kNKdFCKV_8kbb5VOpl_4re4dnuwtmtMw/viewform',
 }
 
@@ -135,6 +135,13 @@ let LVL = {
 
 }
 
+//Music
 let musicPlayer = new MusicPlayer();
-musicPlayer.addAudio('main', 'public/assets/title.mp3');
-musicPlayer.addAudio('game', 'public/assets/game.mp3');
+
+
+/* game.menuMusic = new Phaser.Sound(game,'main',1,true);
+game.levelMusic = new Phaser.Sound(game,'game',1,true); */
+
+
+//musicPlayer.addAudio('main', 'public/assets/title.mp3');
+//musicPlayer.addAudio('game', 'public/assets/game.mp3');

@@ -7,7 +7,17 @@ class Menu extends BaseState {
     create() {
         super.create();
 
-        musicPlayer.playAudio('main');
+        //musicPlayer.playAudio('main');
+        if (game.menuMusic == null) {
+            game.menuMusic = new Phaser.Sound(game, 'mainMusic', 1, true);
+        }
+        if (game.levelMusic!= null && game.levelMusic.isPlaying) {
+            game.levelMusic.stop();
+        }
+        if (game.menuMusic!= null && game.menuMusic.isPlaying) {
+            game.menuMusic.stop();
+        }
+        game.menuMusic.play();
 
         let tBuilder = new TextBuilder(this.game, null);
 
@@ -20,7 +30,7 @@ class Menu extends BaseState {
         tBuilder.writeLineToPos(1000, 1820, WW.updateDate);
 
         //Gombok felvétele
-        let button = this.game.add.button(80, 400, 'playbutton', () => {this.startGame()}, this, 2, 1, 0);
+        let button = this.game.add.button(80, 400, 'playbutton', () => { this.startGame() }, this, 2, 1, 0);
         button.scale.setTo(1.2, 1.2);
 
         let infobutton = this.game.add.button(700, 400, 'infobutton', function () {
@@ -54,7 +64,7 @@ class Menu extends BaseState {
                     console.log(data)
                 } catch (e) {
                     console.log('did not got data from server, starting lv 1')
-                    this.game.state.start('Level1',true,false);
+                    this.game.state.start('Level1', true, false);
                 }
             })
             .catch(error => {

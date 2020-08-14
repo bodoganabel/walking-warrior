@@ -103,6 +103,10 @@ class Preload extends BaseState {
 
         // Particle effect emitter matchEffect
         this.game.load.image('matchEffect', 'public/assets/effects/matchEffect.png')
+        this.game.load.audio('mainMusic', 'public/assets/title.mp3');
+        this.game.load.audio('gameMusic', 'public/assets/game.mp3');
+
+
 
         console.log("running");
     }

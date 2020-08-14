@@ -1,7 +1,7 @@
 class BaseLevel extends BaseState {
-    
-    
-    
+
+
+
     constructor(game) {
         super(game);
         this.scoreToFinish = 1111; //If you see this number in game, then actual level doesn't modyfied this value, and that is a bug    
@@ -33,8 +33,8 @@ class BaseLevel extends BaseState {
 
         //console.log("init");
 
-        
 
+        game.em = null;
 
         game.userMadeFirstMove = false;
         this.tileOffset = 200;
@@ -115,7 +115,7 @@ class BaseLevel extends BaseState {
                 }
 
                 if (keyName == 'p') {
-                    this.createMatchEffect(200,200);
+                    this.createMatchEffect(200, 200);
                     //console.log("game.moves increased to: " + game.moves)
                 }
 
@@ -184,7 +184,7 @@ class BaseLevel extends BaseState {
         //console.log("Got initial token's value: " + data.tokens)
 
         if (parseInt(data.tester) === 1) {
-            this.setupTiles();        
+            this.setupTiles();
             return;
         }
 
@@ -265,8 +265,18 @@ class BaseLevel extends BaseState {
 
         super.create();
 
+        //level music
+        //musicPlayer.playAudio('game');
+        if (game.levelMusic == null) {
+            game.levelMusic = new Phaser.Sound(game, 'gameMusic', 1, true);
+        }
+        if (game.menuMusic!= null && game.menuMusic.isPlaying) {
+            game.menuMusic.stop();
+        }
+        if (!game.levelMusic.isPlaying) {
+            game.levelMusic.play();
+        }
 
-        musicPlayer.playAudio('game');
 
         let button = this.game.add.button(10, 1600, 'backbutton', function () {
 
@@ -307,26 +317,25 @@ class BaseLevel extends BaseState {
             }
             game.nexLevel = parseInt(this.getLevel().substring(5)) + 1; //pl.: Level1 --> 1
 
-            if(game.nexLevel == 24){
-                
+            if (game.nexLevel == 24) {
+
                 this.ajaxPost('ajax.php', { action: 'userCompletedAllLevels' }).then(
                     (resp) => {
                         game.unlockNextLevelIfGetToken = 1; // This signals that user's beaten level 23.
-                
+
                         this.saveGameState();
                         this.game.state.start('Error', true, false, 'Congratulations!\n You have beaten all levels!\n You can play again in any levels or you can try sandbox mode.');
                     }
                 );
             }
-            else
-            {
+            else {
 
                 this.game.time.events.add(10, () => {
-    
+
                     //console.log("Executing next level validation process...\n\n")
                     this.saveGameState();
                     if (game.nexLevel < 24) {
-    
+
                         game.hastoken = false;
                         this.ajaxPost('ajax.php', { action: 'getToken' }).then(
                             (resp) => {
@@ -339,7 +348,7 @@ class BaseLevel extends BaseState {
                                     // If level is 2 or below OR you've already unlocked this level = no token needed to play next level.
                                     if (game.nexLevel < 4 || (game.nexLevel <= game.gameLevel)) {
                                         this.game.state.start('NextLevel', true, false, game.nexLevel)
-    
+
                                     }
                                     // Remove user's token if level > 3. If no token, send him walk.
                                     else if (game.hastoken) {
@@ -351,7 +360,7 @@ class BaseLevel extends BaseState {
                                                 this.game.state.start('NextLevel', true, false, game.nexLevel)
                                             }
                                         );
-    
+
                                     }
                                     else {
                                         game.unlockNextLevelIfGetToken = 1;
@@ -411,8 +420,7 @@ class BaseLevel extends BaseState {
                 });
             }
 
-            if(game.wait_afterSwap)
-            {
+            if (game.wait_afterSwap) {
                 game.wait_afterSwap = false;
                 game.subState = 'firstCheck';
                 //console.log("firstCheck");
@@ -429,9 +437,8 @@ class BaseLevel extends BaseState {
                 });
             }
 
-            if(game.wait_afterRemovedMatches)
-            {
-                game.wait_afterRemovedMatches= false;
+            if (game.wait_afterRemovedMatches) {
+                game.wait_afterRemovedMatches = false;
                 //Call Drop event
                 game.subState = 'drop'
                 //console.log("drop");
@@ -449,8 +456,7 @@ class BaseLevel extends BaseState {
                 });
             }
 
-            if(game.wait_regenerate)
-            {
+            if (game.wait_regenerate) {
                 game.wait_regenerate = false;
                 game.subState = 'checkAfterDrop'
                 //console.log("checkAfterDrop");
@@ -619,21 +625,18 @@ class BaseLevel extends BaseState {
         }
     }
 
-    createMatchEffect(x,y)
-    {
-        if(!game.userMadeFirstMove)
-        {
+    createMatchEffect(x, y) {
+        if (!game.userMadeFirstMove) {
             return;
         }
-        if(game.em == null)
-        {
+        if (game.em == null) {
             game.em = this.game.add.emitter(200, 200, 100);
             game.em.makeParticles('matchEffect');
         }
         game.em.gravity = 0;
         game.em.x = x;
         game.em.y = y;
-        game.em.start(true,800,null, 10);
+        game.em.start(true, 800, null, 10);
         //emitter.destroy(true,true);
     }
 
@@ -660,8 +663,7 @@ class BaseLevel extends BaseState {
                 this.switchClick(true);
             }
 
-            if(game.subState == 'firstCheck')
-            {
+            if (game.subState == 'firstCheck') {
                 this.decrementMoves();
             }
             //console.log("check got matches")
@@ -679,8 +681,7 @@ class BaseLevel extends BaseState {
 
 
                 //if God Mode enabled, let user swap tiles where he wants
-                if (game.GODMODE)
-                {
+                if (game.GODMODE) {
                     //console.log("GOD MODE IS ENABLED")
                     game.moves = 500;
                     game.noAnyOtherMatch = true;
@@ -737,15 +738,13 @@ class BaseLevel extends BaseState {
                 let bonusType = 0;
                 if (match[0].lShape == true) {
                     bonusType = 'magnesium';
-                    if(game.userMadeFirstMove)
-                    {    
+                    if (game.userMadeFirstMove) {
                         game.counter.increment('L-shape');
                         this.incrementScore(15);
                     }
                 } else if (match[0].tShape == true) {
-                    bonusType = 'potassium';                    
-                    if(game.userMadeFirstMove)
-                    {    
+                    bonusType = 'potassium';
+                    if (game.userMadeFirstMove) {
                         game.counter.increment('T-shape');
                         this.incrementScore(15);
                     }
@@ -755,16 +754,14 @@ class BaseLevel extends BaseState {
                     } else if (this.isDefaultTile(match[0])) {
                         bonusType = match[0].tileType + 6;
                     }
-                    if(game.userMadeFirstMove)
-                    {    
+                    if (game.userMadeFirstMove) {
                         game.counter.increment('bonus-count');
                         //create a bonus cell - 5 point
                         this.incrementScore(5);
                     }
 
                 } else {
-                    if(game.userMadeFirstMove)
-                    {    
+                    if (game.userMadeFirstMove) {
                         //3-cell match - 1 point
                         this.incrementScore();
                     }
@@ -772,14 +769,12 @@ class BaseLevel extends BaseState {
 
 
                 if (match.length >= 5 && !match[0].tShape && !match[0].lShape) {
-                    if(game.userMadeFirstMove)
-                    {    
+                    if (game.userMadeFirstMove) {
                         game.counter.increment('5-in-a-row');
                     }
                 }
 
-                if(game.userMadeFirstMove)
-                {    
+                if (game.userMadeFirstMove) {
                     game.counter.increment(match[0].tileType + '-match', match.length);
                 }
 
@@ -796,8 +791,7 @@ class BaseLevel extends BaseState {
                     if (i == 3 && (game.userMadeFirstMove)) {
                         game.subState = 'hasBonus'
                         this.addTile(pos.x, pos.y, bonusType);
-                        if(game.userMadeFirstMove)
-                        {
+                        if (game.userMadeFirstMove) {
                             //use a bonus cell in a match - 1 point + 1 move (we increment by 2 because we just decreased by one with the current move)
                             this.incrementScore();
                             this.incrementMoves(2);
@@ -933,12 +927,10 @@ class BaseLevel extends BaseState {
         let ty = null;
 
         if (type == 0) { //random
-            if(game.userMadeFirstMove)
-            {
+            if (game.userMadeFirstMove) {
                 tileNumber = this.randomizeTile();
             }
-            else
-            {
+            else {
                 tileNumber = this.randomizeTileWithoutSpecs(); //Cannot give special tiles
             }
             ty = 0;
@@ -987,8 +979,7 @@ class BaseLevel extends BaseState {
         return tileTypePool[rnd];
     }
 
-    randomizeTileWithoutSpecs()
-    {
+    randomizeTileWithoutSpecs() {
         let tileTypePool = [1, 2, 3, 4, 5, 6];
         let rnd = Math.floor(Math.random() * tileTypePool.length);
 
@@ -1029,7 +1020,7 @@ class BaseLevel extends BaseState {
         this.clickedPos.y = (tile.y - game.tileHeight / 2) / game.tileHeight;
 
         if (tile.tileType == 'potassium') {
-            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
+            if (!game.userMadeFirstMove) { game.userMadeFirstMove = true; } //indicate, that user started acting
             //console.log("Potassium delete! (row)")
             game.subState = 'deleteRowByPotassium'
             this.deleteRow(tile);
@@ -1039,7 +1030,7 @@ class BaseLevel extends BaseState {
         }
 
         if (tile.tileType == 'magnesium') {
-            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
+            if (!game.userMadeFirstMove) { game.userMadeFirstMove = true; } //indicate, that user started acting
             game.subState = 'deleteColumnByMagnesium'
             //console.log("Magnesium delete! (column)")
             this.deleteCol(tile);
@@ -1050,7 +1041,7 @@ class BaseLevel extends BaseState {
 
         //tile törlése, -2 move
         if (this.deleteOn) {
-            if(!game.userMadeFirstMove){game.userMadeFirstMove = true;} //indicate, that user started acting
+            if (!game.userMadeFirstMove) { game.userMadeFirstMove = true; } //indicate, that user started acting
             this.deleteClick();
             this.decrementMoves(2);
             this.removeTile(tile);
@@ -1154,7 +1145,7 @@ class BaseLevel extends BaseState {
     isBonusTile(tile) {
         return tile.tileType >= 7 && tile.tileType <= 12;
     }
-    
+
 
     checkNeighbouringBonusTiles() {
         //console.log("checking bonus tiles")
@@ -1173,10 +1164,10 @@ class BaseLevel extends BaseState {
 
         let pos = this.getTilePos(tile);
 
-        let rightNeighbour = null, bottomNeighbour = null,  topNeighbour = null, leftNeighbour = null;
+        let rightNeighbour = null, bottomNeighbour = null, topNeighbour = null, leftNeighbour = null;
 
         try {
-            rightNeighbour = game.tileGrid[pos.x + 1][pos.y];            
+            rightNeighbour = game.tileGrid[pos.x + 1][pos.y];
         } catch (error) {
             //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }
@@ -1188,16 +1179,16 @@ class BaseLevel extends BaseState {
         }
 
         try {
-            topNeighbour = game.tileGrid[pos.x][pos.y-1];            
+            topNeighbour = game.tileGrid[pos.x][pos.y - 1];
         } catch (error) {
             //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
         }
 
         try {
-            leftNeighbour = game.tileGrid[pos.x-1][pos.y];            
+            leftNeighbour = game.tileGrid[pos.x - 1][pos.y];
         } catch (error) {
             //console.log("object not found: hasNeighbouringBonusTile/rightNeighbour")
-        }        
+        }
 
         let c1 = this.isBonusTile(tile);
         let c2 = rightNeighbour && this.isBonusTile(rightNeighbour);
