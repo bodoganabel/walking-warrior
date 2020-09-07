@@ -7,8 +7,8 @@ let WW = {
         type: Phaser.CANVAS,
         scene: [],
     },
-    gameVersion: 'v6.7', //Levels switched based on request.
-    updateDate: 'Aug. 14., 2020',
+    gameVersion: 'v6.8', //Levels switched based on request.
+    updateDate: 'Sep. 7., 2020',
     bugReportUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSeXguVIXKymvRkL_8kNKdFCKV_8kbb5VOpl_4re4dnuwtmtMw/viewform',
 }
 
